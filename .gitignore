@@ -1,29 +1,29 @@
 # Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+python-package/__pycache__/
+python-package/*.py[cod]
+python-package/*$py.class
 
 # C extensions
-*.so
+python-package/*.so
 
 # Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+python-package/.Python
+python-package/build/
+python-package/develop-eggs/
+python-package/dist/
+python-package/downloads/
+python-package/eggs/
+python-package/.eggs/
+python-package/lib/
+python-package/lib64/
+python-package/parts/
+python-package/sdist/
+python-package/var/
+python-package/wheels/
+python-package/*.egg-info/
+python-package/.installed.cfg
+python-package/*.egg
+python-package/MANIFEST
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -32,73 +32,73 @@ MANIFEST
 *.spec
 
 # Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+python-package/pip-log.txt
+python-package/pip-delete-this-directory.txt
 
 # Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
+python-package/htmlcov/
+python-package/.tox/
+python-package/.coverage
+python-package/.coverage.*
+python-package/.cache
+python-package/nosetests.xml
+python-package/coverage.xml
+python-package/*.cover
+python-package/.hypothesis/
+python-package/.pytest_cache/
 
 # Translations
-*.mo
-*.pot
+python-package/*.mo
+python-package/*.pot
 
 # Django stuff:
-*.log
-local_settings.py
-db.sqlite3
+python-package/*.log
+python-package/local_settings.py
+python-package/db.sqlite3
 
 # Flask stuff:
-instance/
-.webassets-cache
+python-package/instance/
+python-package/.webassets-cache
 
 # Scrapy stuff:
-.scrapy
+python-package/.scrapy
 
 # Sphinx documentation
-docs/_build/
+python-package/docs/_build/
 
 # PyBuilder
-target/
+python-package/target/
 
 # Jupyter Notebook
-.ipynb_checkpoints
+python-package/.ipynb_checkpoints
 
 # pyenv
-.python-version
+python-package/.python-version
 
 # celery beat schedule file
-celerybeat-schedule
+python-package/celerybeat-schedule
 
 # SageMath parsed files
-*.sage.py
+python-package/*.sage.py
 
 # Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+python-package/.env
+python-package/.venv
+python-package/env/
+python-package/venv/
+python-package/ENV/
+python-package/env.bak/
+python-package/venv.bak/
 
 # Spyder project settings
-.spyderproject
-.spyproject
+python-package/.spyderproject
+python-package/.spyproject
 
 # Rope project settings
-.ropeproject
+python-package/.ropeproject
 
 # mkdocs documentation
-/site
+python-package/site
 
 # mypy
-.mypy_cache/
+python-package/.mypy_cache/
