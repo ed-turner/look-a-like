@@ -1,3 +1,7 @@
+# python package
+python-package/lal/__pycache__/
+python-package/.idea/
+
 # Byte-compiled / optimized / DLL files
 python-package/__pycache__/
 python-package/*.py[cod]
