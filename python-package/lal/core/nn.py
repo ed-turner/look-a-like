@@ -157,14 +157,14 @@ class KNNBase(DistanceBase):
 class KNNPowerMatcher(PowerDistanceBase, KNNBase):
 
     def __init__(self, k, p):
-        super(PowerDistanceBase, self).__init__(p)
-        super(KNNBase, self).__init__(k)
+        PowerDistanceBase.__init__(self, p)
+        KNNBase.__init__(self, k)
 
 
 class KNNCosineMatcher(CosineDistanceBase, KNNBase):
 
     def __init__(self, k):
-        super(KNNBase, self).__init__(k)
+        KNNBase.__init__(self, k)
 
 
 class NNLinearSumBase(DistanceBase):
@@ -174,7 +174,7 @@ class NNLinearSumBase(DistanceBase):
 
     def match(self, mat1, mat2):
         """
-
+        Get all samples in mat2 to match to mat1
         :param mat1:
         :param mat2:
         :return:
@@ -182,15 +182,35 @@ class NNLinearSumBase(DistanceBase):
 
         dist = self.calc_dist(mat1, mat2)
 
-        x_indices, y_indices = linear_sum_assignment(dist)
+        match_lst = []
 
-        return np.column_stack((x_indices.reshape(-1, 1), y_indices.reshape(-1, 1)))
+        mat1_indices = np.arange(mat1.shape[0])
+
+        while True:
+            x_indices, y_indices = linear_sum_assignment(dist[mat1_indices, :])
+
+            matches = np.column_stack((mat1_indices[x_indices].reshape(-1, 1),
+                                       y_indices.reshape(-1, 1)))
+
+            match_lst.append(matches)
+
+            C = np.searchsorted(mat1_indices, matches[:, 0])
+            D = np.delete(np.arange(np.alen(mat1_indices)), C)
+
+            mat1_indices = mat1_indices[D]
+
+            if mat1_indices.shape[0] == 0:
+                break
+
+        matches = np.vstack(match_lst)
+
+        return matches[np.argsort(matches[:, 0]), :]
 
 
 class NNLinearSumPowerMatcher(PowerDistanceBase, NNLinearSumBase):
 
     def __init__(self, p):
-        super(PowerDistanceBase, self).__init__(p)
+        PowerDistanceBase.__init__(self, p)
 
 
 class NNLinearSumCosineMatcher(CosineDistanceBase, NNLinearSumBase):

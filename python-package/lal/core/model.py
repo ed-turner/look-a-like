@@ -6,7 +6,7 @@ from sklearn.base import TransformerMixin
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
-from .knn import KNNPowerMatcher, KNNCosineMatcher, NNLinearSumCosineMatcher, NNLinearSumPowerMatcher
+from .nn import KNNPowerMatcher, KNNCosineMatcher, NNLinearSumCosineMatcher, NNLinearSumPowerMatcher
 from .weights import LGBMClassifierWeight, LGBMRegressorWeight
 
 
