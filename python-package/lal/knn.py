@@ -1,18 +1,78 @@
 from abc import ABCMeta, abstractmethod
 
 import numpy as np
+from scipy.optimize import linear_sum_assignment
 
 from numba import jit
 
 
-class KNNBase(metaclass=ABCMeta):
-
-    def __init__(self, k):
-        self.k = k
+class DistanceBase(metaclass=ABCMeta):
 
     @abstractmethod
     def calc_dist(self, mat1, mat2):
         pass
+
+
+class PowerDistanceBase(DistanceBase):
+
+    def __init__(self, p):
+        self.p = p
+
+    @staticmethod
+    @jit(nopython=True)
+    def _calc_dist(mat1, mat2, p):
+        """
+
+        :param mat1:
+        :param mat2:
+        :return:
+        """
+        abs_dist = np.abs(mat1.reshape(mat1.shape + (1,)) - mat2.reshape(mat2.shape + (1,)).T) ** p
+
+        return np.sum(abs_dist, axis=1) ** (1.0 / p)
+
+    def calc_dist(self, mat1, mat2):
+        return self._calc_dist(mat1, mat2, self.p)
+
+
+class CosineDistanceBase(DistanceBase):
+
+    @staticmethod
+    @jit(nopython=True)
+    def _calc_dist(mat1, mat2):
+        """
+
+        :param mat1:
+        :param mat2:
+        :return:
+        """
+
+        n1 = mat1.shape[0]
+        n2 = mat2.shape[0]
+
+        res = np.zeros((n1, n2))
+
+        for i in range(n1):
+            for j in range(n2):
+                norm_1 = np.linalg.norm(mat1[i, :])
+                norm_2 = np.linalg.norm(mat2[j, :])
+
+                bot = norm_1 * norm_2
+                top = np.dot(mat1[i, :], mat2[j, :])
+
+                res[i, j] = 1.0 - (top / bot)
+                res[j, i] = res[i, j]
+
+        return res
+
+    def calc_dist(self, mat1, mat2):
+        return self._calc_dist(mat1, mat2)
+
+
+class KNNBase(DistanceBase):
+
+    def __init__(self, k):
+        self.k = k
 
     @staticmethod
     @jit(nopython=True)
@@ -45,7 +105,7 @@ class KNNBase(metaclass=ABCMeta):
 
         return self._get_k_neighbors(dist, k)
 
-    def knn_match(self, mat1, mat2):
+    def match(self, mat1, mat2):
         """
 
         :param mat1:
@@ -94,40 +154,25 @@ class KNNBase(metaclass=ABCMeta):
         return res_lst[1:, :]
 
 
-class KNNPowerMatcher(KNNBase):
+class KNNPowerMatcher(PowerDistanceBase, KNNBase):
 
     def __init__(self, k, p):
-        """
-
-        :param k:
-        :param p:
-        """
-        super().__init__(k)
-        self.p = p
-        pass
-
-    @staticmethod
-    @jit(nopython=True)
-    def _calc_dist(mat1, mat2, p):
-        """
-
-        :param mat1:
-        :param mat2:
-        :return:
-        """
-        abs_dist = np.abs(mat1.reshape(mat1.shape + (1,)) - mat2.reshape(mat2.shape + (1,)).T) ** p
-
-        return np.sum(abs_dist, axis=1) ** (1.0 / p)
-
-    def calc_dist(self, mat1, mat2):
-        return self._calc_dist(mat1, mat2, self.p)
+        super(PowerDistanceBase, self).__init__(p)
+        super(KNNBase, self).__init__(k)
 
 
-class KNNCosineMatcher(KNNBase):
+class KNNCosineMatcher(CosineDistanceBase, KNNBase):
 
-    @staticmethod
-    @jit(nopython=True)
-    def _calc_dist(mat1, mat2):
+    def __init__(self, k):
+        super(KNNBase, self).__init__(k)
+
+
+class NNLinearSumBase(DistanceBase):
+
+    def __init__(self):
+        super().__init__()
+
+    def match(self, mat1, mat2):
         """
 
         :param mat1:
@@ -135,23 +180,18 @@ class KNNCosineMatcher(KNNBase):
         :return:
         """
 
-        n1 = mat1.shape[0]
-        n2 = mat2.shape[0]
+        dist = self.calc_dist(mat1, mat2)
 
-        res = np.zeros((n1, n2))
+        x_indices, y_indices = linear_sum_assignment(dist)
 
-        for i in range(n1):
-            for j in range(n2):
-                norm_1 = np.linalg.norm(mat1[i, :])
-                norm_2 = np.linalg.norm(mat2[j, :])
+        return np.column_stack((x_indices.reshape(-1, 1), y_indices.reshape(-1, 1)))
 
-                bot = norm_1 * norm_2
-                top = np.dot(mat1[i, :], mat2[j, :])
 
-                res[i, j] = 1.0 - (top / bot)
-                res[j, i] = res[i, j]
+class NNLinearSumPowerMatcher(PowerDistanceBase, NNLinearSumBase):
 
-        return res
+    def __init__(self, p):
+        super(PowerDistanceBase, self).__init__(p)
 
-    def calc_dist(self, mat1, mat2):
-        return self._calc_dist(mat1, mat2)
+
+class NNLinearSumCosineMatcher(CosineDistanceBase, NNLinearSumBase):
+    pass

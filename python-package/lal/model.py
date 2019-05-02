@@ -6,7 +6,7 @@ from sklearn.base import TransformerMixin
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
-from .knn import KNNPowerMatcher, KNNCosineMatcher
+from .knn import KNNPowerMatcher, KNNCosineMatcher, NNLinearSumCosineMatcher, NNLinearSumPowerMatcher
 from .weights import LGBMClassifierWeight, LGBMRegressorWeight
 
 
@@ -33,9 +33,20 @@ class LALGBBaseModel(metaclass=ABCMeta):
     def __init__(self, k, p):
 
         if isinstance(p, float):
-            self.matcher = KNNPowerMatcher(k, p)
+            if isinstance(k, int):
+                self.matcher = KNNPowerMatcher(k, p)
+            elif k == "linear_sum":
+                self.matcher = NNLinearSumPowerMatcher(p)
+            else:
+                raise ValueError("This type matcher is not supported")
+
         elif p == 'cosine':
-            self.matcher = KNNCosineMatcher(k)
+            if isinstance(k, int):
+                self.matcher = KNNCosineMatcher(k)
+            elif k == "linear_sum":
+                self.matcher = NNLinearSumCosineMatcher()
+            else:
+                raise ValueError("This type matcher is not supported")
         else:
             raise ValueError("This distance is not supported")
 
@@ -81,7 +92,7 @@ class LALGBBaseModel(metaclass=ABCMeta):
 
         matcher = self.matcher
 
-        matches = matcher.knn_match(transformed_test, transformed_train)
+        matches = matcher.match(transformed_test, transformed_train)
 
         return matches
 
