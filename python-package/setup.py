@@ -13,5 +13,6 @@ setup(name="look-a-like", packages=['lal', ],
       author="Edward Turner",
       author_email="edward.turnerr@gmail.com",
       description=README,
-      license=LICENSE
+      license=LICENSE,
+      python_requires='==Python3.7'
       )
