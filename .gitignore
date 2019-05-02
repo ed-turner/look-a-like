@@ -108,4 +108,7 @@ python-package/site
 python-package/.mypy_cache/
 
 # scala IDE files
-scala/.idea/
+# add intel python to root
+scala-package/.idea/
+scala-package/target/
+scala-package/project/target/
