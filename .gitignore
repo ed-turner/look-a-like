@@ -106,3 +106,6 @@ python-package/site
 
 # mypy
 python-package/.mypy_cache/
+
+# scala IDE files
+scala/.idea/
