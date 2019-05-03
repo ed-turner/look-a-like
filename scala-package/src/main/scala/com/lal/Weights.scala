@@ -56,9 +56,9 @@ case class GBRegressorWeights(featureCol: String, predictionCol: String) extends
     predictionCol=predictionCol)
 
   def getFeatureWeights(df: DataFrame): DenseVector = {
-    opt_model = this.optModel(df)
+    val opt_model: GradientBoostingRegressor = this.optModel(df)
 
-    fitted_model = opt_model.fit(df)
+    val fitted_model = opt_model.fit(df)
 
     return fitted_model.feature_importances
   }
@@ -76,9 +76,9 @@ case class GBClassifierWeights(featureCol: String, predictionCol: String) extend
     predictionCol=predictionCol)
 
   def getFeatureWeights(df: DataFrame): DenseVector = {
-    opt_model = this.optModel(df)
+    val opt_model = this.optModel(df)
 
-    fitted_model = opt_model.fit(df)
+    val fitted_model = opt_model.fit(df)
 
     return fitted_model.feature_importances
   }
