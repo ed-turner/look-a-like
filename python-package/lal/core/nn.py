@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, ABC
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
@@ -69,7 +69,7 @@ class CosineDistanceBase(DistanceBase):
         return self._calc_dist(mat1, mat2)
 
 
-class KNNBase(DistanceBase):
+class KNNBase(DistanceBase, ABC):
 
     def __init__(self, k):
         self.k = k
