@@ -11,7 +11,10 @@ from lightgbm import LGBMClassifier, LGBMRegressor
 
 
 class LGBMWeightsBase(metaclass=ABCMeta):
-
+    """
+    This is our base class to help generate our importance weights for our features by using the feature_importance
+    from the gradient boosting method.
+    """
     def __init__(self, metric_name):
         """
 
@@ -25,7 +28,7 @@ class LGBMWeightsBase(metaclass=ABCMeta):
     @staticmethod
     def _get_parameter_space():
         """
-
+        This is our space parameter space.
         :return:
         """
         space = [Integer(1, 10, name='max_depth'),
@@ -44,9 +47,11 @@ class LGBMWeightsBase(metaclass=ABCMeta):
 
     def _opt_model(self, data, labels):
         """
+        This uses our chosen metric, base machine-learning-task-based model and the parameter space to optimize our
+        model when fitting onto the train-split of our data and predicting on our validation-split of our data.
 
-        :param data:
-        :param labels:
+        :param data: Our dataset
+        :param labels: Our labels
         :return:
         """
 
@@ -91,6 +96,8 @@ class LGBMWeightsBase(metaclass=ABCMeta):
 
     def get_feature_importances(self, data, labels):
         """
+        After optimizing the model, we fit on the whole dataset, parse the feature_importance attribute and scale it
+        to sum to one.
 
         :param data:
         :param labels:
@@ -114,7 +121,9 @@ class LGBMWeightsBase(metaclass=ABCMeta):
 
 
 class LGBMClassifierWeight(LGBMWeightsBase):
-
+    """
+    This is for our classification-task
+    """
     def __init__(self):
         super().__init__("neg_log_loss")
 
@@ -123,7 +132,9 @@ class LGBMClassifierWeight(LGBMWeightsBase):
 
 
 class LGBMRegressorWeight(LGBMWeightsBase):
-
+    """
+    This is for our regression-task.
+    """
     def __init__(self):
         super().__init__("neg_mean_squared_error")
 

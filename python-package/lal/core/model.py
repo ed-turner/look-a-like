@@ -11,6 +11,9 @@ from .weights import LGBMClassifierWeight, LGBMRegressorWeight
 
 
 class _Scaler(TransformerMixin):
+    """
+    This class will scale an array with a numpy array based into the __init__
+    """
     def __init__(self, scale):
         self.scale = scale
 
@@ -29,7 +32,12 @@ class _Scaler(TransformerMixin):
 
 
 class LALGBBaseModel(metaclass=ABCMeta):
+    """
+    This is a base model to help generate the Look-A-Like fitting structure.
 
+    Options for k is a non-negative integer, or linear_sum.
+    Options for p is a nonzero float, or cosine.
+    """
     def __init__(self, k, p):
 
         if isinstance(p, float):
@@ -55,9 +63,11 @@ class LALGBBaseModel(metaclass=ABCMeta):
 
     def fit(self, data, labels):
         """
+        We use the weighter object to generate our weights, all according to which type of machine-learning task
+        we are using.
 
-        :param data:
-        :param labels:
+        :param data: Our training data
+        :param labels: Our 1D training labels
         :return:
         """
 
@@ -79,6 +89,8 @@ class LALGBBaseModel(metaclass=ABCMeta):
 
     def _get_matches(self, train_data, test_data):
         """
+        This get the matches between the training dataset and the testing dataset using our matcher, chosen as
+        initialization.
 
         :param train_data:
         :param test_data:
@@ -102,7 +114,9 @@ class LALGBBaseModel(metaclass=ABCMeta):
 
 
 class LALGBClassifier(LALGBBaseModel):
-
+    """
+    This is when our training labels are categorical.
+    """
     def __init__(self, k, p):
         super().__init__(k, p)
 
@@ -110,6 +124,7 @@ class LALGBClassifier(LALGBBaseModel):
 
     def predict_proba(self, train_data, train_labels, test_data):
         """
+        This predicts the probability of our test data having any of the available labels in the training dataset
 
         :param train_data:
         :param train_labels:
@@ -145,6 +160,7 @@ class LALGBClassifier(LALGBBaseModel):
 
     def predict(self, train_data, train_labels, test_data):
         """
+        We choose most probable label our samples in the testing dataset has.
 
         :param train_data:
         :param train_labels:
@@ -154,11 +170,13 @@ class LALGBClassifier(LALGBBaseModel):
 
         probs = self.predict_proba(train_data, train_labels, test_data)
 
-        return np.argmax(probs, axis=1)
+        return np.argmax(probs, axis=1) + 1
 
 
 class LALGBRegressor(LALGBBaseModel):
-
+    """
+    This is when our training labels are continuous.
+    """
     def __init__(self, k, p):
         super().__init__(k, p)
 
@@ -166,6 +184,7 @@ class LALGBRegressor(LALGBBaseModel):
 
     def predict(self, train_data, train_labels, test_data):
         """
+        We predict the possible value our testing dataset will have, based on the continuous variables.
 
         :param train_data:
         :param train_labels:

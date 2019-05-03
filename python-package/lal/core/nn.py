@@ -7,14 +7,18 @@ from numba import jit
 
 
 class DistanceBase(metaclass=ABCMeta):
-
+    """
+    This is our base distance class.
+    """
     @abstractmethod
     def calc_dist(self, mat1, mat2):
         pass
 
 
 class PowerDistanceBase(DistanceBase):
-
+    """
+    This is the distance class that uses the p-norm to generate our distances.
+    """
     def __init__(self, p):
         self.p = p
 
@@ -23,8 +27,9 @@ class PowerDistanceBase(DistanceBase):
     def _calc_dist(mat1, mat2, p):
         """
 
-        :param mat1:
-        :param mat2:
+        :param mat1: Sample 1
+        :param mat2: Sample 2
+        :param p: Our power value for the p-norm
         :return:
         """
         abs_dist = np.abs(mat1.reshape(mat1.shape + (1,)) - mat2.reshape(mat2.shape + (1,)).T) ** p
@@ -36,14 +41,17 @@ class PowerDistanceBase(DistanceBase):
 
 
 class CosineDistanceBase(DistanceBase):
-
+    """
+    This uses the cosine distance.
+    """
     @staticmethod
     @jit(nopython=True)
     def _calc_dist(mat1, mat2):
         """
+        This is a jit function that to help speed up the distance calculation.
 
-        :param mat1:
-        :param mat2:
+        :param mat1: Sample 1
+        :param mat2: Sample 2
         :return:
         """
 
@@ -70,7 +78,9 @@ class CosineDistanceBase(DistanceBase):
 
 
 class KNNBase(DistanceBase, ABC):
-
+    """
+    This is another abstract class for our k-nearest neighbors algorithm
+    """
     def __init__(self, k):
         self.k = k
 
@@ -79,7 +89,8 @@ class KNNBase(DistanceBase, ABC):
     def _get_k_neighbors(dist, k):
         """
 
-        :param dist:
+        :param dist: the kernel distance matrix
+        :param k: the number of neighbors we want
         :return:
         """
 
@@ -95,9 +106,11 @@ class KNNBase(DistanceBase, ABC):
 
     def _knn_match_batch(self, mat1_batch, mat2_batch, k):
         """
+        This is where we calculate the distances, and then perform the match on a batch
 
-        :param mat1_batch:
-        :param mat2_batch:
+        :param mat1_batch: Batch of sample 1
+        :param mat2_batch: Batch of sample 2
+        :param k: he number of neighbors we want
         :return:
         """
 
@@ -107,9 +120,11 @@ class KNNBase(DistanceBase, ABC):
 
     def match(self, mat1, mat2):
         """
+        Given the memory-related issues with the algorithm.  We create a batch process and calculate the distances
+        on a batch of our samples, and generate our matches on that batch.
 
-        :param mat1:
-        :param mat2:
+        :param mat1: Sample 1
+        :param mat2: Sample 2
         :return:
         """
 
@@ -155,28 +170,37 @@ class KNNBase(DistanceBase, ABC):
 
 
 class KNNPowerMatcher(PowerDistanceBase, KNNBase):
-
+    """
+    This is the K-Nearest Neighbor algorithm with the p-norm distance measure.
+    """
     def __init__(self, k, p):
         PowerDistanceBase.__init__(self, p)
         KNNBase.__init__(self, k)
 
 
 class KNNCosineMatcher(CosineDistanceBase, KNNBase):
-
+    """
+    This is the K-Nearest Neighbor algorithm with the cosine distance measure.
+    """
     def __init__(self, k):
         KNNBase.__init__(self, k)
 
 
-class NNLinearSumBase(DistanceBase):
+class NNLinearSumBase(DistanceBase, ABC):
+    """
+    This is the abstract class for the Hungarian Matching Algorithm, where we use the algorithm to exhaust all the
+    unique matches between our samples
 
+    """
     def __init__(self):
         super().__init__()
 
     def match(self, mat1, mat2):
         """
-        Get all samples in mat2 to match to mat1
-        :param mat1:
-        :param mat2:
+        Get all samples in mat2 to match to mat1 by using the linear_sum_assignment.
+
+        :param mat1: Sample 1
+        :param mat2: Sample 2
         :return:
         """
 
@@ -208,10 +232,15 @@ class NNLinearSumBase(DistanceBase):
 
 
 class NNLinearSumPowerMatcher(PowerDistanceBase, NNLinearSumBase):
-
+    """
+    This is the Exhaustive-Hungarian Matching algorithm with the p-norm distance measure.
+    """
     def __init__(self, p):
         PowerDistanceBase.__init__(self, p)
 
 
 class NNLinearSumCosineMatcher(CosineDistanceBase, NNLinearSumBase):
+    """
+    This is the Exhaustive-Hungarian Matching algorithm with the cosine distance measure.
+    """
     pass
