@@ -14,7 +14,10 @@ import org.apache.spark.ml.classification.GradientBoostingClassifier
 import org.apache.spark.ml.regression.GradientBoostingRegressor
 
 // this is a private abstract class not for use on the user end side
-abstract private class Weights(featureCol: String, predictionCol: String) {
+private trait Weights{
+
+  val featureCol: String
+  val predictionCol: String
 
   // this paramgrid is define upon inheritance
   val paramGrid: Map[Param[_], Iterable[_]]
@@ -42,14 +45,14 @@ abstract private class Weights(featureCol: String, predictionCol: String) {
 }
 
 // this class will use the GradientBoostingRegressor
-class GBRegressorWeights(featureCol: String, predictionCol: String) extends Weights{
+case class GBRegressorWeights(featureCol: String, predictionCol: String) extends Weights {
 
-  private val paramGrid = Map(
+  val paramGrid = Map(
     "learning_rate" -> Array((-15 to 15).map(x => Math.pow(10.0, x.toDouble))),
     "n_estimators" -> Array((0 until 15).map(x => 100*(x + 1)))
   )
 
-  private val model: GradientBoostingRegressor = GradientBoostingRegressor(featureCol=featureCol,
+  val model: GradientBoostingRegressor = GradientBoostingRegressor(featureCol=featureCol,
     predictionCol=predictionCol)
 
   def getFeatureWeights(df: DataFrame): DenseVector = {
@@ -62,14 +65,14 @@ class GBRegressorWeights(featureCol: String, predictionCol: String) extends Weig
 }
 
 // this class will use the GradientBoostingRegressor
-class GBClassifierrWeights(featureCol: String, predictionCol: String) extends Weights{
+case class GBClassifierWeights(featureCol: String, predictionCol: String) extends Weights {
 
-  private val paramGrid = Map(
+  val paramGrid: Map[Param[_], Iterable[_]] = Map(
     "learning_rate" -> Array((-15 to 15).map(x => Math.pow(10.0, x.toDouble))),
     "n_estimators" -> Array((0 until 15).map(x => 100*(x + 1)))
   )
 
-  private val model: GradientBoostingClassifier = GradientBoostingClassifier(featureCol=featureCol,
+  val model: GradientBoostingClassifier = GradientBoostingClassifier(featureCol=featureCol,
     predictionCol=predictionCol)
 
   def getFeatureWeights(df: DataFrame): DenseVector = {
