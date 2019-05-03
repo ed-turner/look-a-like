@@ -37,6 +37,10 @@ private trait Weights{
     // this should use the parameters, build
     // CrossValidator(ParamGridBuilder.build(paramGrid)).fit(train_df, val_df)
 
+    // the optimized parameters are then parsed and set in the base model.
+
+    // model.setParams(optParams)
+
   }
 
   // this is dependent on the base model.. But this should return a DenseVector
