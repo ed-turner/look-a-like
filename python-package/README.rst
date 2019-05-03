@@ -4,32 +4,32 @@ Welcome to the Look-A-Like Python Package
 Author: Edward Turner
 
 Introduction
-============
+------------
 
 Generally, we want to be able to predict various characteristics,
- perhaps simultaneously, ensuring that the samples in the testing
-  dateset that "looks like" the samples in the training dataset have 
- similar predictive values.  There are various methods that exist 
- today that are predictive in nature, and are well documented. However, 
- there are few that is able to ensure that samples from the testing dataset 
- with similar features as in the testing dataset have similar predictive values.
+perhaps simultaneously, ensuring that the samples in the testing
+dateset that "looks like" the samples in the training dataset have
+similar predictive values.  There are various methods that exist
+today that are predictive in nature, and are well documented. However,
+there are few that is able to ensure that samples from the testing dataset
+with similar features as in the testing dataset have similar predictive values.
  
- This python package delivers a highly sought-after methodology, which utilizes
- the relative importance each feature has to be predictive to our chosen value
- and scales our features accordingly their importance, then perform a nearest 
- neighbors algorithm to generate our matches.  
+This python package delivers a highly sought-after methodology, which utilizes
+the relative importance each feature has to be predictive to our chosen value
+and scales our features accordingly their importance, then perform a nearest
+neighbors algorithm to generate our matches.
  
- A more full description of the methodology is found under the Methodology section.
+A more full description of the methodology is found under the Methodology section.
 
 Installation
-============
+------------
 
 One method of installing the python package, whether in a virtual environment
- or your own local machine, is to git clone the repo, change the directory
- to the python-package directory, and run `python setup.py install`.  
+or your own local machine, is to git clone the repo, change the directory
+to the python-package directory, and run `python setup.py install`.
 
 Methodology
-===========
+-----------
 
 As mentioned in the introduction, we derive some values that are based on
 the predictive power of each feature and scale those features by those values. To
@@ -49,41 +49,39 @@ have the k-nearest-neighbors algorithm and the hungarian-matching algorithm.
 This gives us a total of 4 types of matching algorithms.  
 
 Tutorial
-========
+--------
 
 To use this model, simply follow this short example
 
-.. example-code::
+.. code-block:: python
 
-    .. code-block:: python
+  from lal import LALGBRegressor
 
-      from lal import LALGBRegressor
+  # to use the linear sum assigment for matches,
+  # pass linear_sum to k;
+  # and use the cosine measure,
+  # pass cosine to the p value
+  model_params = {
+  "k": "linear_sum",
+  "p": "cosine"
+                 }
 
-      # to use the linear sum assigment for matches,
-      # pass linear_sum to k;
-      # and use the cosine measure,
-      # pass cosine to the p value
-      model_params = {
-      "k": "linear_sum",
-      "p": "cosine"
-                     }
+  model = LALGBRegressor(**model_params)
 
-      model = LALGBRegressor(**model_params)
+  model.fit(train_data, train_labels)
 
-      model.fit(train_data, train_labels)
-
-      test_labels = model.predict(
-                              train_data,
-                              train_labels,
-                              test_data
-                              )
+  test_labels = model.predict(
+                          train_data,
+                          train_labels,
+                          test_data
+                          )
 
 As a note, it is suggested that all missing values are taken cared off before 
 using the model.
 
 
 Documentation
-=============
+-------------
 
 For code documentations, please go to https://look-a-like.github.io/python
 
