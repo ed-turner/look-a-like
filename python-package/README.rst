@@ -83,6 +83,6 @@ using the model.
 Documentation
 -------------
 
-For code documentations, please go to https://look-a-like.github.io/python
+For code documentations, please go `here <https://ed-turner.github.io/python-look-a-like/>`_.
 
-Or have a look at the code repository.
+Or have a look at the code `repository <https://github.com/ed-turner/look-a-like/tree/master/python-package>`_.
