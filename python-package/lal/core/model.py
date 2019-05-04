@@ -67,7 +67,9 @@ class LALGBBaseModel(metaclass=ABCMeta):
         we are using.
 
         :param data: Our training data
+        :type data: numpy.array
         :param labels: Our 1D training labels
+        :type labels: numpy.array
         :return:
         """
 
@@ -126,9 +128,12 @@ class LALGBClassifier(LALGBBaseModel):
         """
         This predicts the probability of our test data having any of the available labels in the training dataset
 
-        :param train_data:
-        :param train_labels:
-        :param test_data:
+        :param train_data: The training dataset features
+        :type train_data: numpy.array
+        :param train_labels: The training dataset labels
+        :type train_labels: numpy.array
+        :param test_data: The testing dataset features
+        :type test_data: numpy.array
         :return:
         """
 
@@ -162,9 +167,12 @@ class LALGBClassifier(LALGBBaseModel):
         """
         We choose most probable label our samples in the testing dataset has.
 
-        :param train_data:
-        :param train_labels:
-        :param test_data:
+        :param train_data: The training dataset features
+        :type train_data: numpy.array
+        :param train_labels: The training dataset labels
+        :type train_labels: numpy.array
+        :param test_data: The testing dataset features
+        :type test_data: numpy.array
         :return:
         """
 
@@ -186,9 +194,12 @@ class LALGBRegressor(LALGBBaseModel):
         """
         We predict the possible value our testing dataset will have, based on the continuous variables.
 
-        :param train_data:
-        :param train_labels:
-        :param test_data:
+        :param train_data: The training dataset features
+        :type train_data: numpy.array
+        :param train_labels: The training dataset labels
+        :type train_labels: numpy.array
+        :param test_data: The testing dataset features
+        :type test_data: numpy.array
         :return:
         """
 

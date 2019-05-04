@@ -37,6 +37,15 @@ class PowerDistanceBase(DistanceBase):
         return np.sum(abs_dist, axis=1) ** (1.0 / p)
 
     def calc_dist(self, mat1, mat2):
+        """
+        This calculates the distance
+
+        :param mat1: Sample 1
+        :type mat1: numpy.array
+        :param mat2: Sample 2
+        :type mat2: numpy.array
+        :return:
+        """
         return self._calc_dist(mat1, mat2, self.p)
 
 
@@ -74,6 +83,15 @@ class CosineDistanceBase(DistanceBase):
         return res
 
     def calc_dist(self, mat1, mat2):
+        """
+        This calculates the distance
+
+        :param mat1: Sample 1
+        :type mat1: numpy.array
+        :param mat2: Sample 2
+        :type mat2: numpy.array
+        :return:
+        """
         return self._calc_dist(mat1, mat2)
 
 
@@ -124,7 +142,9 @@ class KNNBase(DistanceBase, ABC):
         on a batch of our samples, and generate our matches on that batch.
 
         :param mat1: Sample 1
+        :type mat1: numpy.array
         :param mat2: Sample 2
+        :type mat2: numpy.array
         :return:
         """
 
@@ -200,7 +220,9 @@ class NNLinearSumBase(DistanceBase, ABC):
         Get all samples in mat2 to match to mat1 by using the linear_sum_assignment.
 
         :param mat1: Sample 1
+        :type mat1: numpy.array
         :param mat2: Sample 2
+        :type mat2: numpy.array
         :return:
         """
 

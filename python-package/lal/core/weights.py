@@ -99,8 +99,10 @@ class LGBMWeightsBase(metaclass=ABCMeta):
         After optimizing the model, we fit on the whole dataset, parse the feature_importance attribute and scale it
         to sum to one.
 
-        :param data:
-        :param labels:
+        :param data: Our training data
+        :type data: numpy.array
+        :param labels: Our 1D training labels
+        :type labels: numpy.array
         :return:
         """
         opt_params = self._opt_model(data, labels)
