@@ -82,6 +82,9 @@ private trait GBWeights {
       .addGrid(model.subsamplingRate, Array((-15 to 0).map(x => Math.pow(10.0, x.toDouble))))
       .build()
 
+
+  def optModel(df: DataFrame): PredictionModel
+
   /**
     * @return Returns feature importance based on the weighting process normalized to sum to one.
     */
@@ -99,7 +102,11 @@ private trait GBWeights {
 /**
   * A class to represent a ''feature weighting process'' using the Gradient-Boosting Tree regression task.
   *
-  *
+  * {{{
+  * val weighter = GBRegressorWeights("prediction", "label")
+  * weighter.featureCol
+  * weighter.predictionCol
+  * }}}
   * @author Edward Turner
   * @todo Add additional documentation about this class
   * @version 1.0
@@ -117,7 +124,11 @@ final case class GBRegressorWeights(featureCol: String, predictionCol: String) e
 /**
   * A class to represent a ''feature weighting process'' using the Gradient-Boosting Tree classification task.
   *
-  *
+  * {{{
+  * val weighter = GBClassifierWeights("prediction", "label")
+  * weighter.featureCol
+  * weighter.predictionCol
+  * }}}
   * @author Edward Turner
   * @todo Add additional documentation about this class
   * @version 1.0
