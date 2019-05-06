@@ -6,8 +6,8 @@ import org.apache.spark.ml.linalg.DenseVector
 
 // this is for the validation split
 import org.apache.spark.ml.PredictionModel
-import org.apache.spark.ml.param.Param
-import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit}
+import org.apache.spark.ml.param.{Param, ParamMap}
+import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit, TrainValidationSplitModel}
 import org.apache.spark.ml.evaulation.{Evaluator, BinaryClassificationEvaluator, RegressionEvaluator}
 
 // this is for the chosen model structure
@@ -25,24 +25,24 @@ import org.apache.spark.ml.regression.GBTRegressor
   */
 
 // this is a private abstract class not for use on the user end side
-private trait Weights{
+sealed trait Weights{
 
   val featureCol: String
   val predictionCol: String
 
   // this paramgrid is define upon inheritance
-  val paramGrid: Map[Param[_], Iterable[_]]
+  val paramGrid: Array[ParamMap]
 
   // the evaluator to use
-  val evaluator: Evaluator
+  val evaluator: Any
 
   // this is the base model we want to use, which is defined upon inheritance
-  val model: Estimator
+  val model: Any
 
   /**
     * @return Returns the optimized `model` of this weighting process.
     */
-  def optModel(df: DataFrame): PredictionModel = {
+  def optModel(df: DataFrame): TrainValidationSplitModel = {
     """
       | This function will optimize the Estimator chosen for this class
     """.stripMargin
@@ -61,7 +61,13 @@ private trait Weights{
   /**
     * @return Returns feature importance based on the weighting process
     */
-  def getFeatureWeights: DenseVector
+  def getFeatureWeights(df: DataFrame): DenseVector = {
+    val opt_model = this.optModel(df)
+
+    val fitted_model = opt_model.transform(df)
+
+    return fitted_model.featureImportances
+  }
 
 }
 
@@ -73,31 +79,29 @@ private trait Weights{
   * @todo Add additional documentation about this trait
   * @version 1.0
   */
-private trait GBWeights {
+sealed trait GBRegWeights {
+
+  val model = new GBTRegressor()
+
+  val evaluator = new RegressionEvaluator()
 
   val paramGrid = new ParamGridBuilder()
     .addGrid(model.maxIter, Array((0 until 15).map(x => 100*(x + 1))))
-    .addGrid(model.maxDepth, Array((0 until 15))
-      .addGrid(model.stepSize, Array((-15 to 0).map(x => Math.pow(10.0, x.toDouble))))
-      .addGrid(model.subsamplingRate, Array((-15 to 0).map(x => Math.pow(10.0, x.toDouble))))
-      .build()
+    .addGrid(model.maxDepth, Array((0 until 15)))
+    .addGrid(model.stepSize, Array((-15 to 0).map(x => Math.pow(10.0, x.toDouble))))
+    .addGrid(model.subsamplingRate, Array((-15 to 0).map(x => Math.pow(10.0, x.toDouble))))
+    .build()
 
-
-  def optModel(df: DataFrame): PredictionModel
-
-  /**
-    * @return Returns feature importance based on the weighting process normalized to sum to one.
-    */
-  def getFeatureWeights(df: DataFrame): DenseVector = {
-    val opt_model = this.optModel(df)
-
-    val fitted_model = opt_model.fit(df)
-
-    return fitted_model.featureImportances
-  }
 
 }
 
+sealed trait GBClasWeights {
+
+  val evaulator = new BinaryClassificationEvaluator()
+
+  val model = new GBTClassifier()
+
+}
 
 /**
   * A class to represent a ''feature weighting process'' using the Gradient-Boosting Tree regression task.
@@ -111,12 +115,7 @@ private trait GBWeights {
   * @todo Add additional documentation about this class
   * @version 1.0
   */
-final case class GBRegressorWeights(featureCol: String, predictionCol: String) extends Weights with GBWeights {
-
-  val evaluator = new RegressionEvaluator
-
-  val model: GradientBoostingRegressor = GradientBoostingRegressor(featureCol=featureCol,
-    predictionCol=predictionCol)
+final case class GBRegressorWeights() extends Weights with GBRegWeights {
 
 }
 
@@ -133,11 +132,7 @@ final case class GBRegressorWeights(featureCol: String, predictionCol: String) e
   * @todo Add additional documentation about this class
   * @version 1.0
   */
-final case class GBClassifierWeights(featureCol: String, predictionCol: String) extends Weights with GBWeights {
+final case class GBClassifierWeights() extends Weights with GBClasWeights {
 
-  val evaulator = new BinaryClassificationEvaluator
-
-  val model: GBTClassifier = GBTClassifier(featureCol=featureCol,
-    predictionCol=predictionCol)
 
 }
