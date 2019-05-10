@@ -1,4 +1,4 @@
-Welcome to the Look-A-Like Python Package
+Software Package Details
 =========================================
 
 Author: Edward Turner
