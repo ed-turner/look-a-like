@@ -77,7 +77,7 @@ using the model.
 
 ## Documentation
 
-For code documentations, please go [here](https://ed-turner.github.io/lal/)
+For code documentations, please go [here](https://ed-turner.github.io/look-a-like/)
 
 Or have a look at the code repository.
 
