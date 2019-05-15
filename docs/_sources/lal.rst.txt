@@ -1,0 +1,17 @@
+lal package
+===========
+
+Subpackages
+-----------
+
+.. toctree::
+
+    lal.core
+
+Module contents
+---------------
+
+.. automodule:: lal
+    :members:
+    :undoc-members:
+    :show-inheritance:

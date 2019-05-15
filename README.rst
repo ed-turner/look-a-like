@@ -86,3 +86,12 @@ Documentation
 For code documentations, please go `here <https://ed-turner.github.io/python-look-a-like/>`_.
 
 Or have a look at the code `repository <https://github.com/ed-turner/look-a-like/tree/master/python-package>`_.
+
+License
+-------
+
+This work is dual-licensed under Apache 2.0 and GPL 2.0 (or any later version).
+You can choose between one of them if you use this work.
+
+`SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later`
+
