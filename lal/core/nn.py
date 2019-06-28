@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod, ABC
 
 import numpy as np
-from scipy.optimize import linear_sum_assignment
+import lap
 
 from numba import jit
 
@@ -230,23 +230,42 @@ class NNLinearSumBase(DistanceBase, ABC):
 
         match_lst = []
 
-        mat1_indices = np.arange(mat1.shape[0])
+        n = mat1.shape[0]
+        m = mat2.shape[0]
+
+        mat_on_indcs = np.array([True] * n)
+        mat1_indices = np.arange(n)
 
         while True:
-            x_indices, y_indices = linear_sum_assignment(dist[mat1_indices, :])
+            dist_batch = dist[mat1_indices[mat_on_indcs], :]
 
-            matches = np.column_stack((mat1_indices[x_indices].reshape(-1, 1),
-                                       y_indices.reshape(-1, 1)))
+            # if we have less samples in the first array than second, we break
+            if dist_batch.shape[0] <= m:
+                cost, x_indices, y_indices = lap.lapjv(dist_batch, extend_cost=True)
 
-            match_lst.append(matches)
+                matches = np.column_stack((mat1_indices[mat_on_indcs].reshape(-1, 1),
+                                           x_indices.reshape(-1, 1)))
 
-            C = np.searchsorted(mat1_indices, matches[:, 0])
-            D = np.delete(np.arange(np.alen(mat1_indices)), C)
+                match_lst.append(matches)
 
-            mat1_indices = mat1_indices[D]
-
-            if mat1_indices.shape[0] == 0:
                 break
+
+            else:
+                # we get all of the possible matches
+                cost, x_indices, y_indices = lap.lapjv(dist_batch.T, extend_cost=True)
+
+                # we reset the x_indices for convenience
+                x_indices = mat1_indices[mat_on_indcs][x_indices]
+
+                # we get our matches
+                matches = np.column_stack((x_indices,
+                                           np.arange(m).reshape(-1, 1)))
+
+                # all that were matched already are set to False
+                mat_on_indcs[np.isin(mat1_indices, x_indices)] = False
+
+                # we append our matches to the master list
+                match_lst.append(matches)
 
         matches = np.vstack(match_lst)
 
