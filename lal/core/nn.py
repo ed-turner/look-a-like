@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod, ABC
 
 import numpy as np
-import lap
+from lap import lapjv
 
 from numba import jit
 
@@ -241,7 +241,7 @@ class NNLinearSumBase(DistanceBase, ABC):
 
             # if we have less samples in the first array than second, we break
             if dist_batch.shape[0] <= m:
-                cost, x_indices, y_indices = lap.lapjv(dist_batch, extend_cost=True)
+                cost, x_indices, y_indices = lapjv(dist_batch, extend_cost=True)
 
                 matches = np.column_stack((mat1_indices[mat_on_indcs].reshape(-1, 1),
                                            x_indices.reshape(-1, 1)))
@@ -252,7 +252,7 @@ class NNLinearSumBase(DistanceBase, ABC):
 
             else:
                 # we get all of the possible matches
-                cost, x_indices, y_indices = lap.lapjv(dist_batch.T, extend_cost=True)
+                cost, x_indices, y_indices = lapjv(dist_batch.T, extend_cost=True)
 
                 # we reset the x_indices for convenience
                 x_indices = mat1_indices[mat_on_indcs][x_indices]

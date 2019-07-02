@@ -76,7 +76,7 @@ To use this model, simply follow this short example
                           test_data
                           )
 
-As a note, it is suggested that all missing values are taken cared off before 
+As a note, it is suggested that all missing values are taken cared of before
 using the model.
 
 
