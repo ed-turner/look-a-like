@@ -49,6 +49,35 @@ class _PowerDistance(_DistanceBase):
         return self._calc_dist(mat1, mat2, self.p)
 
 
+class _MahalanobisDistance(_PowerDistance):
+
+    def __init__(self):
+        _PowerDistance.__init__(self, 2.0)
+
+    def calc_dist(self, mat1, mat2):
+        """
+
+        :param mat1:
+        :param mat2:
+        :return:
+        """
+
+        # we calculate the covariance matrix
+        cov = np.cov(np.vstack((mat1, mat2)).T)
+
+        # we compute the eigenvalue decomposition for symmetric matrices
+        x, v = np.linalg.eigh(cov)
+
+        # we want to squash small eigenvalues and only big eigenvalues
+        indices = v < 1e-10
+
+        # we decorrelate our matrix, and scale
+        mat1_new = np.dot(np.dot(mat1, x[:, ~indices]), np.diag(v[~indices] ** -1.0))
+        mat2_new = np.dot(np.dot(mat2, x[:, ~indices]), np.diag(v[~indices] ** -1.0))
+
+        return _PowerDistance.calc_dist(self, mat1_new, mat2_new)
+
+
 class _CosineDistance(_DistanceBase):
     """
     This uses the cosine distance.
@@ -198,6 +227,14 @@ class KNNPowerMatcher(_PowerDistance, _KNNBase):
         _KNNBase.__init__(self, k)
 
 
+class KNNMahalanobisMatcher(_MahalanobisDistance, _KNNBase):
+    """
+    This is the K-Nearest Neighbor algorithm with the mahalanobis distance measure.
+    """
+    def __init__(self, k):
+        _KNNBase.__init__(self, k)
+
+
 class KNNCosineMatcher(_CosineDistance, _KNNBase):
     """
     This is the K-Nearest Neighbor algorithm with the cosine distance measure.
@@ -278,6 +315,13 @@ class NNLinearSumPowerMatcher(_PowerDistance, _NNLinearSumBase):
     """
     def __init__(self, p):
         _PowerDistance.__init__(self, p)
+
+
+class NNLinearSumMahalanobisMatcher(_MahalanobisDistance, _NNLinearSumBase):
+    """
+    This is the Exhaustive-Hungarian Matching algorithm with the mahalanobis distance measure.
+    """
+    pass
 
 
 class NNLinearSumCosineMatcher(_CosineDistance, _NNLinearSumBase):
