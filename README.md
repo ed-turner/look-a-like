@@ -71,7 +71,7 @@ test_labels = model.predict(
 
 ```
 
-As a note, it is suggested that all missing values are taken cared off before 
+As a note, it is suggested that all missing values are taken cared of before 
 using the model.
 
 
