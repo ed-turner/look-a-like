@@ -26,7 +26,7 @@ class _DistanceBase(metaclass=ABCMeta):
         pass
 
 
-class PowerDistance(_DistanceBase):
+class _PowerDistance(_DistanceBase):
     """
 
     """
@@ -70,6 +70,7 @@ class PowerDistance(_DistanceBase):
 
         subtract_vector_udf = self.calculate_distance_udf()
 
+        # this sums all the p-powered differences between the vectors, and then takes the 1/p power of the final sum
         dist_sdf = all_sdf.select("*", (F.sum(*subtract_vector_udf(F.array('v1', 'v2'))) ** (1.0 / p)).alias('diff'))
 
         dist_sdf.persist()
@@ -104,7 +105,7 @@ class _KNNMatcherBase(_DistanceBase, ABC):
         return top_k_match_sdf
 
 
-class KNNPowerMatcher(PowerDistance, _KNNMatcherBase):
+class KNNPowerMatcher(_PowerDistance, _KNNMatcherBase):
     """
 
     """
@@ -117,5 +118,5 @@ class KNNPowerMatcher(PowerDistance, _KNNMatcherBase):
         """
 
         _KNNMatcherBase.__init__(self, k)
-        PowerDistance.__init__(self, p)
+        _PowerDistance.__init__(self, p)
 
