@@ -40,9 +40,9 @@ Once we derive our feature importance, we scale our features according to their
 feature importance, after standardizing our features.  There are several available
 distance measures to use for our matching algorithm, along with different ways
 to find our closest neighbors.  For our distance calculation, we have the 
-p-norm measure and the cosine measure. For our nearest-neighbors algorithm, we 
-have the k-nearest-neighbors algorithm and the hungarian-matching algorithm. 
-This gives us a total of 4 types of matching algorithms.  
+p-norm measure, the mahalanobis measure, and the cosine measure. For our
+nearest-neighbors algorithm, we have the k-nearest-neighbors algorithm and the
+hungarian-matching algorithm. This gives us a total of 6 types of matching algorithms.
 
 ## Tutorial
 
