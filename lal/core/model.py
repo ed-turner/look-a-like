@@ -10,7 +10,7 @@ from sklearn.pipeline import Pipeline
 from lal.utils.logger import LALLogger
 from lal.utils.asserts import AssertArgumentNDArray
 
-from .nn import KNNPowerMatcher, KNNCosineMatcher, NNLinearSumCosineMatcher, NNLinearSumPowerMatcher
+from .nn import KNNPowerMatcher, KNNCosineMatcher, NNLinearSumCosineMatcher, NNLinearSumPowerMatcher, KNNMahalanobisMatcher, NNLinearSumMahalanobisMatcher
 from .weights import LGBMClassifierWeight, LGBMRegressorWeight
 
 
@@ -65,6 +65,14 @@ class _LALGBBaseModel(metaclass=ABCMeta):
                 self.matcher = KNNCosineMatcher(k)
             elif k == "linear_sum":
                 self.matcher = NNLinearSumCosineMatcher()
+            else:
+                raise ValueError("This type matcher is not supported")
+
+        elif p == 'mahalanbois':
+            if isinstance(k, int):
+                self.matcher = KNNMahalanobisMatcher(k)
+            elif k == "linear_sum":
+                self.matcher = NNLinearSumMahalanobisMatcher()
             else:
                 raise ValueError("This type matcher is not supported")
         else:
