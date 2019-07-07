@@ -6,9 +6,15 @@ with open("requirements.txt", 'r') as f:
 with open("README.md") as f:
     README = f.readlines()
 
-LICENSE = ''
+with open("LICENSE.apache") as f:
+    LICENSE = f.readlines()
 
-setup(name="look-a-like", packages=find_packages(exclude=("lal.spark.*",)),
+LICENSE = LICENSE + ['\n']
+
+with open("LICENSE.gpl") as f:
+    LICENSE += f.readlines()
+
+setup(name="look-a-like", packages=find_packages(exclude=("lal.spark.*", "tests.*.*.*")),
       install_requires=REQUIREMENTS, version="0.0.0",
       author="Edward Turner",
       author_email="edward.turnerr@gmail.com",
