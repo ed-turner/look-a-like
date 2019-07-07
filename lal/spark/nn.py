@@ -7,7 +7,7 @@ from pyspark.sql.types import DoubleType
 from pyspark.ml.linalg import Vector, DenseMatrix, VectorUDT
 
 
-class DistanceBase(metaclass=ABCMeta):
+class _DistanceBase(metaclass=ABCMeta):
     """
     This is a base class to help organize the code-base
     """
@@ -26,7 +26,7 @@ class DistanceBase(metaclass=ABCMeta):
         pass
 
 
-class PowerDistance(DistanceBase):
+class PowerDistance(_DistanceBase):
     """
 
     """
@@ -53,7 +53,7 @@ class PowerDistance(DistanceBase):
 
         return tmp
 
-    @DistanceBase.assertor.assert_arguments
+    @_DistanceBase.assertor.assert_arguments
     def calculate_distance(self, sdf1, sdf2):
         """
         This will calculate the distance between the vector-type columns of two spark dataframes
@@ -77,7 +77,7 @@ class PowerDistance(DistanceBase):
         return dist_sdf
 
 
-class KNNMatcherBase(DistanceBase, ABC):
+class _KNNMatcherBase(_DistanceBase, ABC):
 
     def __init__(self, k):
         self.k = k
@@ -104,7 +104,7 @@ class KNNMatcherBase(DistanceBase, ABC):
         return top_k_match_sdf
 
 
-class KNNPowerMatcher(PowerDistance, KNNMatcherBase):
+class KNNPowerMatcher(PowerDistance, _KNNMatcherBase):
     """
 
     """
@@ -116,6 +116,6 @@ class KNNPowerMatcher(PowerDistance, KNNMatcherBase):
         :param k:
         """
 
-        KNNMatcherBase.__init__(self, k)
+        _KNNMatcherBase.__init__(self, k)
         PowerDistance.__init__(self, p)
 
