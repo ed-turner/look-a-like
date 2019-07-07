@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open("requirements.txt", 'r') as f:
     REQUIREMENTS = f.read()
@@ -8,7 +8,7 @@ with open("README.md") as f:
 
 LICENSE = ''
 
-setup(name="look-a-like", packages=['lal', ],
+setup(name="look-a-like", packages=find_packages(exclude=("lal.spark.*",)),
       install_requires=REQUIREMENTS, version="0.0.0",
       author="Edward Turner",
       author_email="edward.turnerr@gmail.com",
