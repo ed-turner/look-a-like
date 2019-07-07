@@ -6,7 +6,7 @@ from lap import lapjv
 from numba import jit
 
 
-class DistanceBase(metaclass=ABCMeta):
+class _DistanceBase(metaclass=ABCMeta):
     """
     This is our base distance class.
     """
@@ -15,7 +15,7 @@ class DistanceBase(metaclass=ABCMeta):
         pass
 
 
-class PowerDistanceBase(DistanceBase):
+class _PowerDistance(_DistanceBase):
     """
     This is the distance class that uses the p-norm to generate our distances.
     """
@@ -49,7 +49,7 @@ class PowerDistanceBase(DistanceBase):
         return self._calc_dist(mat1, mat2, self.p)
 
 
-class CosineDistanceBase(DistanceBase):
+class _CosineDistance(_DistanceBase):
     """
     This uses the cosine distance.
     """
@@ -95,7 +95,7 @@ class CosineDistanceBase(DistanceBase):
         return self._calc_dist(mat1, mat2)
 
 
-class KNNBase(DistanceBase, ABC):
+class _KNNBase(_DistanceBase, ABC):
     """
     This is another abstract class for our k-nearest neighbors algorithm
     """
@@ -189,24 +189,24 @@ class KNNBase(DistanceBase, ABC):
         return res_lst[1:, :]
 
 
-class KNNPowerMatcher(PowerDistanceBase, KNNBase):
+class KNNPowerMatcher(_PowerDistance, _KNNBase):
     """
     This is the K-Nearest Neighbor algorithm with the p-norm distance measure.
     """
     def __init__(self, k, p):
-        PowerDistanceBase.__init__(self, p)
-        KNNBase.__init__(self, k)
+        _PowerDistance.__init__(self, p)
+        _KNNBase.__init__(self, k)
 
 
-class KNNCosineMatcher(CosineDistanceBase, KNNBase):
+class KNNCosineMatcher(_CosineDistance, _KNNBase):
     """
     This is the K-Nearest Neighbor algorithm with the cosine distance measure.
     """
     def __init__(self, k):
-        KNNBase.__init__(self, k)
+        _KNNBase.__init__(self, k)
 
 
-class NNLinearSumBase(DistanceBase, ABC):
+class _NNLinearSumBase(_DistanceBase, ABC):
     """
     This is the abstract class for the Hungarian Matching Algorithm, where we use the algorithm to exhaust all the
     unique matches between our samples
@@ -272,15 +272,15 @@ class NNLinearSumBase(DistanceBase, ABC):
         return matches[np.argsort(matches[:, 0]), :]
 
 
-class NNLinearSumPowerMatcher(PowerDistanceBase, NNLinearSumBase):
+class NNLinearSumPowerMatcher(_PowerDistance, _NNLinearSumBase):
     """
     This is the Exhaustive-Hungarian Matching algorithm with the p-norm distance measure.
     """
     def __init__(self, p):
-        PowerDistanceBase.__init__(self, p)
+        _PowerDistance.__init__(self, p)
 
 
-class NNLinearSumCosineMatcher(CosineDistanceBase, NNLinearSumBase):
+class NNLinearSumCosineMatcher(_CosineDistance, _NNLinearSumBase):
     """
     This is the Exhaustive-Hungarian Matching algorithm with the cosine distance measure.
     """

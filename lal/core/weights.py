@@ -10,7 +10,7 @@ from skopt.utils import use_named_args
 from lightgbm import LGBMClassifier, LGBMRegressor
 
 
-class LGBMWeightsBase(metaclass=ABCMeta):
+class _LGBMWeightsBase(metaclass=ABCMeta):
     """
     This is our base class to help generate our importance weights for our features by using the feature_importance
     from the gradient boosting method.
@@ -122,7 +122,7 @@ class LGBMWeightsBase(metaclass=ABCMeta):
         return self
 
 
-class LGBMClassifierWeight(LGBMWeightsBase):
+class LGBMClassifierWeight(_LGBMWeightsBase):
     """
     This is for our classification-task
     """
@@ -133,7 +133,7 @@ class LGBMClassifierWeight(LGBMWeightsBase):
         return LGBMClassifier()
 
 
-class LGBMRegressorWeight(LGBMWeightsBase):
+class LGBMRegressorWeight(_LGBMWeightsBase):
     """
     This is for our regression-task.
     """

@@ -35,7 +35,7 @@ class _Scaler(TransformerMixin):
             raise ValueError("The shape of the scaling factors and the input data is not the same")
 
 
-class LALGBBaseModel(metaclass=ABCMeta):
+class _LALGBBaseModel(metaclass=ABCMeta):
     """
     This is a base model to help generate the Look-A-Like fitting structure.
 
@@ -131,7 +131,7 @@ class LALGBBaseModel(metaclass=ABCMeta):
         pass
 
 
-class LALGBClassifier(LALGBBaseModel):
+class LALGBClassifier(_LALGBBaseModel):
     """
     This is when our training labels are categorical.
     """
@@ -141,8 +141,8 @@ class LALGBClassifier(LALGBBaseModel):
 
         self.weighter = LGBMClassifierWeight()
 
-    @LALGBBaseModel.lal_logger.log_error
-    @LALGBBaseModel.assertor.assert_arguments
+    @_LALGBBaseModel.lal_logger.log_error
+    @_LALGBBaseModel.assertor.assert_arguments
     def predict_proba(self, train_data, train_labels, test_data):
         """
         This predicts the probability of our test data having any of the available labels in the training dataset
@@ -184,8 +184,8 @@ class LALGBClassifier(LALGBBaseModel):
 
         return preds
 
-    @LALGBBaseModel.lal_logger.log_error
-    @LALGBBaseModel.assertor.assert_arguments
+    @_LALGBBaseModel.lal_logger.log_error
+    @_LALGBBaseModel.assertor.assert_arguments
     def predict(self, train_data, train_labels, test_data):
         """
         We choose most probable label our samples in the testing dataset has.
@@ -206,7 +206,7 @@ class LALGBClassifier(LALGBBaseModel):
         return np.argmax(probs, axis=1) + 1
 
 
-class LALGBRegressor(LALGBBaseModel):
+class LALGBRegressor(_LALGBBaseModel):
     """
     This is when our training labels are continuous.
     """
@@ -216,8 +216,8 @@ class LALGBRegressor(LALGBBaseModel):
 
         self.weighter = LGBMRegressorWeight()
 
-    @LALGBBaseModel.lal_logger.log_error
-    @LALGBBaseModel.assertor.assert_arguments
+    @_LALGBBaseModel.lal_logger.log_error
+    @_LALGBBaseModel.assertor.assert_arguments
     def predict(self, train_data, train_labels, test_data):
         """
         We predict the possible value our testing dataset will have, based on the continuous variables.
