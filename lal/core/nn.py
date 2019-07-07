@@ -180,21 +180,23 @@ class _KNNBase(_DistanceBase, ABC):
         n1 = mat1.shape[0]
         n2 = mat2.shape[0]
 
-        res_lst = np.zeros((1, self.k)).astype(np.int64)
+        k = self.k
+
+        res_lst = np.zeros((1, k)).astype(np.int64)
 
         for i in range(0, n1, 100):
             tmp_i_indices = np.arange(i, min(i + 100, n1))
 
             mat1_batch = np.ascontiguousarray(mat1[tmp_i_indices, :])
 
-            unique_i_batch_indices = np.zeros((1, self.k))
+            unique_i_batch_indices = np.zeros((1, k))
 
             for j in range(0, n2, 100):
                 tmp_j_indices = np.arange(j, min(j + 100, n2))
 
                 mat2_batch = np.ascontiguousarray(mat1[tmp_j_indices, :])
 
-                indices = self._knn_match_batch(mat1_batch, mat2_batch, self.k)
+                indices = self._knn_match_batch(mat1_batch, mat2_batch, k)
 
                 for k in range(indices.shape[0]):
                     unique_i_batch_indices = np.vstack((unique_i_batch_indices, indices))
@@ -207,13 +209,13 @@ class _KNNBase(_DistanceBase, ABC):
 
             mat2_batch = mat2[unique_mat2_batch_lst, :]
 
-            tmp_indices = self._knn_match_batch(mat1_batch, mat2_batch, self.k)
+            tmp_indices = self._knn_match_batch(mat1_batch, mat2_batch, k)
 
             for k in range(tmp_indices.shape[0]):
                 k_indices = np.ascontiguousarray(tmp_indices[k, :].reshape(-1, )).astype(np.int64)
 
                 res_lst = np.vstack((res_lst,
-                                     np.ascontiguousarray(unique_mat2_batch_lst[k_indices].reshape(-1, self.k))))
+                                     np.ascontiguousarray(unique_mat2_batch_lst[k_indices].reshape(-1, k))))
 
         return res_lst[1:, :]
 
