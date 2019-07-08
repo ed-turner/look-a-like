@@ -69,11 +69,11 @@ class _MahalanobisDistance(_PowerDistance):
         x, v = np.linalg.eigh(cov)
 
         # we want to squash small eigenvalues and only big eigenvalues
-        indices = v < 1e-10
+        indices = x < 1e-10
 
         # we decorrelate our matrix, and scale
-        mat1_new = np.dot(np.dot(mat1, x[:, ~indices]), np.diag(v[~indices] ** -1.0))
-        mat2_new = np.dot(np.dot(mat2, x[:, ~indices]), np.diag(v[~indices] ** -1.0))
+        mat1_new = np.dot(np.dot(mat1, v[:, ~indices]), np.diag(x[~indices] ** -0.5))
+        mat2_new = np.dot(np.dot(mat2, v[:, ~indices]), np.diag(x[~indices] ** -0.5))
 
         return _PowerDistance.calc_dist(self, mat1_new, mat2_new)
 

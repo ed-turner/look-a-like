@@ -1,9 +1,12 @@
 from abc import ABCMeta, abstractmethod, ABC
 
+import numpy as np
+
 from .utils.asserts import AssertArgumentSparkDataFrame
 
 import pyspark.sql.functions as F
 from pyspark.sql.types import DoubleType
+from pyspark.ml.stat import Correlation
 from pyspark.ml.linalg import Vector, DenseMatrix, VectorUDT
 
 
@@ -76,6 +79,36 @@ class _PowerDistance(_DistanceBase):
         dist_sdf.persist()
 
         return dist_sdf
+
+
+class _MahalanobisDistance(_PowerDistance):
+    """
+
+    """
+
+    def __init__(self):
+        _PowerDistance.__init__(self, 2.0)
+
+    @_PowerDistance.assertor.assert_arguments
+    def calculate_distance(self, sdf1, sdf2):
+        """
+        This will calculate the distance between the vector-type columns of two spark dataframes
+
+        :param sdf1: This is to have a columns id1 (dtype int) and v1 (dtype Vector)
+        :param sdf2: This is to have a columns id2 (dtype int) and v2 (dtype Vector)
+        :return:
+        """
+
+        corr = Correlation.corr(sdf1, "v1").head()[0].toArray()
+
+        # this ensures all nan is zero.
+        corr[np.isnan(corr)] = 0.0
+
+        x, v = np.linalg.eigh(corr)
+
+
+
+        return _PowerDistance.calculate_distance(sdf1, sdf2)
 
 
 class _KNNMatcherBase(_DistanceBase, ABC):

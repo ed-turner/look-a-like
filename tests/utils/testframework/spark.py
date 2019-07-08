@@ -7,7 +7,7 @@ class PySparkTestFramework(unittest.TestCase):
 
     @classmethod
     def get_spark_session(cls):
-        return SparkSession.builder.master().appName().getOrCreate()
+        return SparkSession.builder.appName("test").master("local[*]").getOrCreate()
 
     def assert_all_close_spark_dataframe(self, sdf1, sdf2):
         """

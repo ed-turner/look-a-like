@@ -144,8 +144,8 @@ class LALGBClassifier(_LALGBBaseModel):
     This is when our training labels are categorical.
     """
 
-    def __init__(self, k, p):
-        super().__init__(k, p)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
         self.weighter = LGBMClassifierWeight()
 
@@ -219,8 +219,8 @@ class LALGBRegressor(_LALGBBaseModel):
     This is when our training labels are continuous.
     """
 
-    def __init__(self, k, p):
-        super().__init__(k, p)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
         self.weighter = LGBMRegressorWeight()
 
