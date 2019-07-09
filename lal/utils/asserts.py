@@ -19,12 +19,19 @@ class AssertArgumentTypeBase:
         if assert_type is None:
             raise ValueError("The assert_type was not set.")
 
+        # considering we are applying this onto object behaviors, we will ignore the first argument
         def decorated(*args, **kwargs):
-            for arg in args:
-                assert isinstance(arg, assert_type)
+            for arg in args[1:]:
+                try:
+                    assert isinstance(arg, assert_type)
+                except AssertionError:
+                    raise AssertionError("{} is not a {}".format(arg.__name__, str(assert_type)))
 
             for val in kwargs.values():
-                assert isinstance(val, assert_type)
+                try:
+                    assert isinstance(val, assert_type)
+                except AssertionError:
+                    raise AssertionError("{} is not a {}".format(val.__name__, str(assert_type)))
 
             return funct(*args, **kwargs)
 
