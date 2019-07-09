@@ -46,13 +46,15 @@ class _PowerDistance(_DistanceBase):
         :type mat2: numpy.array
         :return:
         """
-        return self._calc_dist(mat1, mat2, self.p)
+        p = self.p
+
+        return self._calc_dist(mat1, mat2, p)
 
 
-class _MahalanobisDistance(_PowerDistance):
+class _MahalanobisDistance(_DistanceBase):
 
     def __init__(self):
-        _PowerDistance.__init__(self, 2.0)
+        pass
 
     def calc_dist(self, mat1, mat2):
         """
@@ -61,6 +63,7 @@ class _MahalanobisDistance(_PowerDistance):
         :param mat2:
         :return:
         """
+        p = 2.0
 
         # we calculate the covariance matrix
         cov = np.cov(np.vstack((mat1, mat2)).T)
@@ -75,7 +78,9 @@ class _MahalanobisDistance(_PowerDistance):
         mat1_new = np.dot(np.dot(mat1, v[:, ~indices]), np.diag(x[~indices] ** -0.5))
         mat2_new = np.dot(np.dot(mat2, v[:, ~indices]), np.diag(x[~indices] ** -0.5))
 
-        return _PowerDistance.calc_dist(self, mat1_new, mat2_new)
+        abs_dist = np.abs(mat1_new.reshape(mat1_new.shape + (1,)) - mat2_new.reshape(mat2_new.shape + (1,)).T) ** p
+
+        return np.sum(abs_dist, axis=1) ** (1.0 / p)
 
 
 class _CosineDistance(_DistanceBase):
@@ -182,14 +187,14 @@ class _KNNBase(_DistanceBase, ABC):
 
         k = self.k
 
-        res_lst = np.zeros((1, k)).astype(np.int64)
+        res_lst = []
 
         for i in range(0, n1, 100):
             tmp_i_indices = np.arange(i, min(i + 100, n1))
 
             mat1_batch = np.ascontiguousarray(mat1[tmp_i_indices, :])
 
-            unique_i_batch_indices = np.zeros((1, k))
+            unique_i_batch_lst = []
 
             for j in range(0, n2, 100):
                 tmp_j_indices = np.arange(j, min(j + 100, n2))
@@ -198,26 +203,23 @@ class _KNNBase(_DistanceBase, ABC):
 
                 indices = self._knn_match_batch(mat1_batch, mat2_batch, k)
 
-                for k in range(indices.shape[0]):
-                    unique_i_batch_indices = np.vstack((unique_i_batch_indices, indices))
+                for i2 in range(indices.shape[0]):
+                    unique_i_batch_lst.append(tmp_j_indices[indices[i2].astype(np.int64)].reshape(1, k))
 
-            unique_mat2_batch_lst = np.unique(
-                np.ascontiguousarray(
-                    unique_i_batch_indices[1:, :].reshape(-1, )
-                ).astype(np.int64)
+            unique_mat2_batch_flat = np.unique(
+                np.vstack(unique_i_batch_lst).reshape(-1, ).astype(np.int64)
             )
 
-            mat2_batch = mat2[unique_mat2_batch_lst, :]
+            mat2_batch = mat2[unique_mat2_batch_flat, :]
 
             tmp_indices = self._knn_match_batch(mat1_batch, mat2_batch, k)
 
-            for k in range(tmp_indices.shape[0]):
-                k_indices = np.ascontiguousarray(tmp_indices[k, :].reshape(-1, )).astype(np.int64)
+            for z in range(tmp_indices.shape[0]):
+                k_indices = np.ascontiguousarray(tmp_indices[z, :].reshape(-1, )).astype(np.int64)
 
-                res_lst = np.vstack((res_lst,
-                                     np.ascontiguousarray(unique_mat2_batch_lst[k_indices].reshape(-1, k))))
+                res_lst.append(np.ascontiguousarray(unique_mat2_batch_flat[k_indices].reshape(-1, k)))
 
-        return res_lst[1:, :]
+        return np.vstack(res_lst).astype(np.int64)
 
 
 class KNNPowerMatcher(_PowerDistance, _KNNBase):

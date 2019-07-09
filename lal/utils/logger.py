@@ -60,9 +60,8 @@ class LALLogger:
                 return funct(*args, **kwargs)
             except Exception as e:
                 logger.error(e, exc_info=True)
-                logger.error("We are returning none.")
 
-                return None
+                raise e
 
         # making sure the name of the funct did not change
         decorated.__name__ = funct.__name__

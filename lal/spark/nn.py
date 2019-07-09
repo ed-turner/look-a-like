@@ -2,16 +2,17 @@ from abc import ABCMeta, abstractmethod, ABC
 
 import numpy as np
 
+import warnings
+
 from .utils.asserts import AssertArgumentSparkDataFrame
 
 import pyspark.sql.functions as F
 from pyspark.sql import Row
 from pyspark.sql.window import Window
 from pyspark.sql.types import DoubleType
-from pyspark.ml.stat import Correlation
 from pyspark.ml.linalg import VectorUDT
 from pyspark.mllib.linalg import DenseMatrix, Vectors
-from pyspark.mllib.linalg.distributed import IndexedRowMatrix, IndexedRow
+from pyspark.mllib.linalg.distributed import IndexedRowMatrix, IndexedRow, RowMatrix
 
 
 class _DistanceBase(metaclass=ABCMeta):
@@ -90,6 +91,9 @@ class _MahalanobisDistance(_DistanceBase):
 
     def __init__(self):
         _DistanceBase.__init__(self)
+        warnings.warn("Currently, the distance measure does not match with what is provided in scipy.. However, this" +
+                      " measure follows the definition of the Mahalanobis distance. This implies scipy and spark " +
+                      "computes the covariance differently..")
 
     @_DistanceBase.assertor.assert_arguments
     def calculate_distance(self, sdf1, sdf2):
@@ -101,14 +105,13 @@ class _MahalanobisDistance(_DistanceBase):
         :return:
         """
 
-        corr = Correlation.corr(sdf1, "v1").head()[0].toArray()
+        cov = RowMatrix(sdf1.select(["v1"]).withColumnRenamed("v1", "v")
+                        .union(sdf2.select(["v2"]).withColumnRenamed("v2", "v")).rdd
+                        .map(lambda row: Vectors.fromML(row.asDict()["v"]))).computeCovariance().toArray()
 
-        # this ensures all nan is zero.
-        corr[np.isnan(corr)] = 0.0
+        x, v = np.linalg.eigh(cov)
 
-        x, v = np.linalg.eigh(corr)
-
-        indices = 1e-10 < x
+        indices = 1e-10 <= x
 
         # we are trying to enfore the data types to be only python types
         n = int(v.shape[0])
@@ -154,6 +157,37 @@ class _MahalanobisDistance(_DistanceBase):
             return float(vec[0].squared_distance(vec[1])) ** 0.5
 
         all_sdf = _sdf1.crossJoin(_sdf2)
+
+        dist_sdf = all_sdf.select("*", tmp(F.array('v1', 'v2')).alias('diff'))
+
+        dist_sdf.persist()
+
+        return dist_sdf
+
+
+class _CosineDistance(_DistanceBase):
+    """
+
+    """
+
+    def __init__(self):
+        _DistanceBase.__init__(self)
+
+    @_DistanceBase.assertor.assert_arguments
+    def calculate_distance(self, sdf1, sdf2):
+        """
+        This will calculate the distance between the vector-type columns of two spark dataframes
+
+        :param sdf1: This is to have a columns id1 (dtype int) and v1 (dtype Vector)
+        :param sdf2: This is to have a columns id2 (dtype int) and v2 (dtype Vector)
+        :return:
+        """
+
+        @F.udf(DoubleType(), VectorUDT())
+        def tmp(vec):
+            return 1.0 - (float(vec[0].dot(vec[1])) / float(vec[0].norm(2.) * vec[1].norm(2.)))
+
+        all_sdf = sdf1.crossJoin(sdf2)
 
         dist_sdf = all_sdf.select("*", tmp(F.array('v1', 'v2')).alias('diff'))
 
@@ -224,4 +258,18 @@ class KNNMahalanobisMatcher(_MahalanobisDistance, _KNNMatcherBase):
         _KNNMatcherBase.__init__(self, k)
         _MahalanobisDistance.__init__(self)
 
+
+class KNNCosineMatcher(_CosineDistance, _KNNMatcherBase):
+    """
+    This is the K-Nearest Neighbor algorithm with the cosine distance measure.
+    """
+
+    def __init__(self, k):
+        """
+
+        :param k:
+        """
+
+        _KNNMatcherBase.__init__(self, k)
+        _CosineDistance.__init__(self)
 
