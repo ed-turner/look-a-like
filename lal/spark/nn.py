@@ -83,15 +83,15 @@ class _PowerDistance(_DistanceBase):
         return dist_sdf
 
 
-class _MahalanobisDistance(_PowerDistance):
+class _MahalanobisDistance(_DistanceBase):
     """
 
     """
 
     def __init__(self):
-        _PowerDistance.__init__(self, 2.0)
+        _DistanceBase.__init__(self)
 
-    @_PowerDistance.assertor.assert_arguments
+    @_DistanceBase.assertor.assert_arguments
     def calculate_distance(self, sdf1, sdf2):
         """
         This will calculate the distance between the vector-type columns of two spark dataframes
@@ -110,8 +110,17 @@ class _MahalanobisDistance(_PowerDistance):
 
         indices = 1e-10 < x
 
-        v_spark = DenseMatrix(v.shape[0], indices.sum(), v[:, indices].reshape(-1,).tolist())
-        x_spark = DenseMatrix(indices.sum(), indices.sum(), np.diag(x[indices] ** -0.5).reshape(-1,).tolist())
+        # we are trying to enfore the data types to be only python types
+        n = int(v.shape[0])
+        m = int(indices.sum())
+
+        v_vals = [float(val) for val in v[:, indices].reshape(-1,).tolist()]
+
+        v_spark = DenseMatrix(n, m, v_vals)
+
+        x_vals = [float(val) for val in np.diag(x[indices] ** -0.5).reshape(-1,).tolist()]
+
+        x_spark = DenseMatrix(m, m, x_vals)
 
         # we get the index to maintain the order
         _sdf1 = sdf1.rdd.zipWithIndex()\
@@ -129,14 +138,24 @@ class _MahalanobisDistance(_PowerDistance):
 
         # we apply our transformation and then set it as our new variable
         _sdf1 = _sdf1.drop("v1").join(_sdf1_mat.multiply(v_spark).multiply(x_spark).rows\
-                                      .map(lambda indexed_row: Row(index=indexed_row.asDict()["index"],
-                                                                   v1=indexed_row.asDict()["vector"])).toDF(), "index")
+                                      .map(lambda indexed_row: Row(index=indexed_row.index,
+                                                                   v1=indexed_row.vector)).toDF(), "index")
 
         _sdf2 = _sdf2.drop("v2").join(_sdf2_mat.multiply(v_spark).multiply(x_spark).rows\
-                                      .map(lambda indexed_row: Row(index=indexed_row.asDict()["index"],
-                                                                   v2=indexed_row.asDict()["vector"])).toDF(), "index")
+                                      .map(lambda indexed_row: Row(index=indexed_row.index,
+                                                                   v2=indexed_row.vector)).toDF(), "index")
 
-        return _PowerDistance.calculate_distance(_sdf1, _sdf2)
+        @F.udf(DoubleType(), VectorUDT())
+        def tmp(vec):
+            return float(vec[0].squared_distance(vec[1])) ** 0.5
+
+        all_sdf = _sdf1.crossJoin(_sdf2)
+
+        dist_sdf = all_sdf.select("*", tmp(F.array('v1', 'v2')).alias('diff'))
+
+        dist_sdf.persist()
+
+        return dist_sdf
 
 
 class _KNNMatcherBase(_DistanceBase, ABC):
