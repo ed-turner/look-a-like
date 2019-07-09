@@ -8,7 +8,7 @@ from pyspark.ml.pipeline import Pipeline
 
 # in-house packages
 from .utils.asserts import AssertArgumentSparkDataFrame
-from .nn import KNNPowerMatcher
+from .nn import KNNPowerMatcher, KNNCosineMatcher, KNNMahalanobisMatcher
 from lal.utils.logger import LALLogger
 
 
@@ -27,6 +27,17 @@ class _LALModelBase(metaclass=ABCMeta):
         if isinstance(p, float):
             if isinstance(k, int):
                 self.matcher = KNNPowerMatcher(k, p)
+            else:
+                raise ValueError("This type matcher is not supported")
+        elif p == 'cosine':
+            if isinstance(k, int):
+                self.matcher = KNNCosineMatcher(k)
+            else:
+                raise ValueError("This type matcher is not supported")
+
+        elif p == 'mahalanbois':
+            if isinstance(k, int):
+                self.matcher = KNNMahalanobisMatcher(k)
             else:
                 raise ValueError("This type matcher is not supported")
         else:
