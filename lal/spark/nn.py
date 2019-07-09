@@ -196,7 +196,7 @@ class _KNNMatcherBase(_DistanceBase, ABC):
 
 class KNNPowerMatcher(_PowerDistance, _KNNMatcherBase):
     """
-
+    This is the K-Nearest Neighbor algorithm with the p-norm distance measure.
     """
 
     def __init__(self, p, k):
@@ -212,13 +212,12 @@ class KNNPowerMatcher(_PowerDistance, _KNNMatcherBase):
 
 class KNNMahalanobisMatcher(_MahalanobisDistance, _KNNMatcherBase):
     """
-
+    This is the K-Nearest Neighbor algorithm with the mahalanobis distance measure.
     """
 
     def __init__(self, k):
         """
 
-        :param p:
         :param k:
         """
 
