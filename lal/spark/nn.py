@@ -5,9 +5,13 @@ import numpy as np
 from .utils.asserts import AssertArgumentSparkDataFrame
 
 import pyspark.sql.functions as F
+from pyspark.sql import Row
+from pyspark.sql.window import Window
 from pyspark.sql.types import DoubleType
 from pyspark.ml.stat import Correlation
-from pyspark.ml.linalg import Vector, DenseMatrix, VectorUDT
+from pyspark.ml.linalg import VectorUDT
+from pyspark.mllib.linalg import DenseMatrix, Vectors
+from pyspark.mllib.linalg.distributed import IndexedRowMatrix, IndexedRow
 
 
 class _DistanceBase(metaclass=ABCMeta):
@@ -50,9 +54,9 @@ class _PowerDistance(_DistanceBase):
 
         p = self.p
 
-        @F.udf(VectorUDT())
+        @F.udf(DoubleType(), VectorUDT())
         def tmp(vec):
-            return (vec[0] - vec[1]) ** p
+            return float((vec[0] - vec[1]).norm(p))
 
         return tmp
 
@@ -66,15 +70,13 @@ class _PowerDistance(_DistanceBase):
         :return:
         """
 
-        p = self.p
-
         # this is the cartesian join
         all_sdf = sdf1.crossJoin(sdf2)
 
         subtract_vector_udf = self.calculate_distance_udf()
 
         # this sums all the p-powered differences between the vectors, and then takes the 1/p power of the final sum
-        dist_sdf = all_sdf.select("*", (F.sum(*subtract_vector_udf(F.array('v1', 'v2'))) ** (1.0 / p)).alias('diff'))
+        dist_sdf = all_sdf.select("*", subtract_vector_udf(F.array('v1', 'v2')).alias('diff'))
 
         dist_sdf.persist()
 
@@ -106,9 +108,35 @@ class _MahalanobisDistance(_PowerDistance):
 
         x, v = np.linalg.eigh(corr)
 
+        indices = 1e-10 < x
 
+        v_spark = DenseMatrix(v.shape[0], indices.sum(), v[:, indices].reshape(-1,).tolist())
+        x_spark = DenseMatrix(indices.sum(), indices.sum(), np.diag(x[indices] ** -0.5).reshape(-1,).tolist())
 
-        return _PowerDistance.calculate_distance(sdf1, sdf2)
+        # we get the index to maintain the order
+        _sdf1 = sdf1.rdd.zipWithIndex()\
+            .map(lambda val_key: Row(id1=val_key[0].id1, v1=val_key[0].v1, index=val_key[1])).toDF()
+
+        _sdf2 = sdf2.rdd.zipWithIndex()\
+            .map(lambda val_key: Row(id2=val_key[0].id2, v2=val_key[0].v2, index=val_key[1])).toDF()
+
+        # we get our indexed row matrix
+        _sdf1_mat = IndexedRowMatrix(_sdf1.rdd.map(lambda row: IndexedRow(index=row.asDict()["index"],
+                                                                          vector=Vectors.fromML(row.asDict()["v1"]))))
+
+        _sdf2_mat = IndexedRowMatrix(_sdf2.rdd.map(lambda row: IndexedRow(index=row.asDict()["index"],
+                                                                          vector=Vectors.fromML(row.asDict()["v2"]))))
+
+        # we apply our transformation and then set it as our new variable
+        _sdf1 = _sdf1.drop("v1").join(_sdf1_mat.multiply(v_spark).multiply(x_spark).rows\
+                                      .map(lambda indexed_row: Row(index=indexed_row.asDict()["index"],
+                                                                   v1=indexed_row.asDict()["vector"])).toDF(), "index")
+
+        _sdf2 = _sdf2.drop("v2").join(_sdf2_mat.multiply(v_spark).multiply(x_spark).rows\
+                                      .map(lambda indexed_row: Row(index=indexed_row.asDict()["index"],
+                                                                   v2=indexed_row.asDict()["vector"])).toDF(), "index")
+
+        return _PowerDistance.calculate_distance(_sdf1, _sdf2)
 
 
 class _KNNMatcherBase(_DistanceBase, ABC):
@@ -119,6 +147,7 @@ class _KNNMatcherBase(_DistanceBase, ABC):
     def match(self, sdf1, sdf2):
         """
         This will match the two spark dataframes together
+
         :param sdf1: The training dataset
         :type sdf1: pyspark.sql.dataframe.DataFrame
         :param sdf2: The testing dataset
@@ -131,7 +160,11 @@ class _KNNMatcherBase(_DistanceBase, ABC):
 
         dist_sdf = self.calculate_distance(sdf1, sdf2)
 
-        top_k_match_sdf = dist_sdf.groupby("id2").agg(F.sort_array(F.col("diff")).limit(k)).select(["id1", "id2"])
+        # this partitions the data by the id2 values and than sort each row by the difference
+        window = Window.partitionBy(dist_sdf['id2']).orderBy(dist_sdf['diff'].asc())
+
+        top_k_match_sdf = dist_sdf.select('*', F.rank().over(window).alias('rank'))\
+            .filter("rank <= {}".format(k)).select(["id1", "id2"])
 
         top_k_match_sdf.persist()
 
@@ -152,4 +185,21 @@ class KNNPowerMatcher(_PowerDistance, _KNNMatcherBase):
 
         _KNNMatcherBase.__init__(self, k)
         _PowerDistance.__init__(self, p)
+
+
+class KNNMahalanobisMatcher(_MahalanobisDistance, _KNNMatcherBase):
+    """
+
+    """
+
+    def __init__(self, k):
+        """
+
+        :param p:
+        :param k:
+        """
+
+        _KNNMatcherBase.__init__(self, k)
+        _MahalanobisDistance.__init__(self)
+
 
