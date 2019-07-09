@@ -126,8 +126,12 @@ class _MahalanobisDistance(_DistanceBase):
         _sdf1 = sdf1.rdd.zipWithIndex()\
             .map(lambda val_key: Row(id1=val_key[0].id1, v1=val_key[0].v1, index=val_key[1])).toDF()
 
+        _sdf1.persist()
+
         _sdf2 = sdf2.rdd.zipWithIndex()\
             .map(lambda val_key: Row(id2=val_key[0].id2, v2=val_key[0].v2, index=val_key[1])).toDF()
+
+        _sdf2.persist()
 
         # we get our indexed row matrix
         _sdf1_mat = IndexedRowMatrix(_sdf1.rdd.map(lambda row: IndexedRow(index=row.asDict()["index"],
