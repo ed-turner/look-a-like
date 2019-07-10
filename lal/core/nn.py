@@ -6,7 +6,7 @@ from lap import lapjv
 from numba import jit
 
 
-class DistanceBase(metaclass=ABCMeta):
+class _DistanceBase(metaclass=ABCMeta):
     """
     This is our base distance class.
     """
@@ -15,7 +15,7 @@ class DistanceBase(metaclass=ABCMeta):
         pass
 
 
-class PowerDistanceBase(DistanceBase):
+class _PowerDistance(_DistanceBase):
     """
     This is the distance class that uses the p-norm to generate our distances.
     """
@@ -46,10 +46,44 @@ class PowerDistanceBase(DistanceBase):
         :type mat2: numpy.array
         :return:
         """
-        return self._calc_dist(mat1, mat2, self.p)
+        p = self.p
+
+        return self._calc_dist(mat1, mat2, p)
 
 
-class CosineDistanceBase(DistanceBase):
+class _MahalanobisDistance(_DistanceBase):
+
+    def __init__(self):
+        pass
+
+    def calc_dist(self, mat1, mat2):
+        """
+
+        :param mat1:
+        :param mat2:
+        :return:
+        """
+        p = 2.0
+
+        # we calculate the covariance matrix
+        cov = np.cov(np.vstack((mat1, mat2)).T)
+
+        # we compute the eigenvalue decomposition for symmetric matrices
+        x, v = np.linalg.eigh(cov)
+
+        # we want to squash small eigenvalues and only big eigenvalues
+        indices = x < 1e-10
+
+        # we decorrelate our matrix, and scale
+        mat1_new = np.dot(np.dot(mat1, v[:, ~indices]), np.diag(x[~indices] ** -0.5))
+        mat2_new = np.dot(np.dot(mat2, v[:, ~indices]), np.diag(x[~indices] ** -0.5))
+
+        abs_dist = np.abs(mat1_new.reshape(mat1_new.shape + (1,)) - mat2_new.reshape(mat2_new.shape + (1,)).T) ** p
+
+        return np.sum(abs_dist, axis=1) ** (1.0 / p)
+
+
+class _CosineDistance(_DistanceBase):
     """
     This uses the cosine distance.
     """
@@ -95,7 +129,7 @@ class CosineDistanceBase(DistanceBase):
         return self._calc_dist(mat1, mat2)
 
 
-class KNNBase(DistanceBase, ABC):
+class _KNNBase(_DistanceBase, ABC):
     """
     This is another abstract class for our k-nearest neighbors algorithm
     """
@@ -151,62 +185,69 @@ class KNNBase(DistanceBase, ABC):
         n1 = mat1.shape[0]
         n2 = mat2.shape[0]
 
-        res_lst = np.zeros((1, self.k)).astype(np.int64)
+        k = self.k
+
+        res_lst = []
 
         for i in range(0, n1, 100):
             tmp_i_indices = np.arange(i, min(i + 100, n1))
 
             mat1_batch = np.ascontiguousarray(mat1[tmp_i_indices, :])
 
-            unique_i_batch_indices = np.zeros((1, self.k))
+            unique_i_batch_lst = []
 
             for j in range(0, n2, 100):
                 tmp_j_indices = np.arange(j, min(j + 100, n2))
 
                 mat2_batch = np.ascontiguousarray(mat1[tmp_j_indices, :])
 
-                indices = self._knn_match_batch(mat1_batch, mat2_batch, self.k)
+                indices = self._knn_match_batch(mat1_batch, mat2_batch, k)
 
-                for k in range(indices.shape[0]):
-                    unique_i_batch_indices = np.vstack((unique_i_batch_indices, indices))
+                for i2 in range(indices.shape[0]):
+                    unique_i_batch_lst.append(tmp_j_indices[indices[i2].astype(np.int64)].reshape(1, k))
 
-            unique_mat2_batch_lst = np.unique(
-                np.ascontiguousarray(
-                    unique_i_batch_indices[1:, :].reshape(-1, )
-                ).astype(np.int64)
+            unique_mat2_batch_flat = np.unique(
+                np.vstack(unique_i_batch_lst).reshape(-1, ).astype(np.int64)
             )
 
-            mat2_batch = mat2[unique_mat2_batch_lst, :]
+            mat2_batch = mat2[unique_mat2_batch_flat, :]
 
-            tmp_indices = self._knn_match_batch(mat1_batch, mat2_batch, self.k)
+            tmp_indices = self._knn_match_batch(mat1_batch, mat2_batch, k)
 
-            for k in range(tmp_indices.shape[0]):
-                k_indices = np.ascontiguousarray(tmp_indices[k, :].reshape(-1, )).astype(np.int64)
+            for z in range(tmp_indices.shape[0]):
+                k_indices = np.ascontiguousarray(tmp_indices[z, :].reshape(-1, )).astype(np.int64)
 
-                res_lst = np.vstack((res_lst,
-                                     np.ascontiguousarray(unique_mat2_batch_lst[k_indices].reshape(-1, self.k))))
+                res_lst.append(np.ascontiguousarray(unique_mat2_batch_flat[k_indices].reshape(-1, k)))
 
-        return res_lst[1:, :]
+        return np.vstack(res_lst).astype(np.int64)
 
 
-class KNNPowerMatcher(PowerDistanceBase, KNNBase):
+class KNNPowerMatcher(_PowerDistance, _KNNBase):
     """
     This is the K-Nearest Neighbor algorithm with the p-norm distance measure.
     """
     def __init__(self, k, p):
-        PowerDistanceBase.__init__(self, p)
-        KNNBase.__init__(self, k)
+        _PowerDistance.__init__(self, p)
+        _KNNBase.__init__(self, k)
 
 
-class KNNCosineMatcher(CosineDistanceBase, KNNBase):
+class KNNMahalanobisMatcher(_MahalanobisDistance, _KNNBase):
+    """
+    This is the K-Nearest Neighbor algorithm with the mahalanobis distance measure.
+    """
+    def __init__(self, k):
+        _KNNBase.__init__(self, k)
+
+
+class KNNCosineMatcher(_CosineDistance, _KNNBase):
     """
     This is the K-Nearest Neighbor algorithm with the cosine distance measure.
     """
     def __init__(self, k):
-        KNNBase.__init__(self, k)
+        _KNNBase.__init__(self, k)
 
 
-class NNLinearSumBase(DistanceBase, ABC):
+class _NNLinearSumBase(_DistanceBase, ABC):
     """
     This is the abstract class for the Hungarian Matching Algorithm, where we use the algorithm to exhaust all the
     unique matches between our samples
@@ -272,15 +313,22 @@ class NNLinearSumBase(DistanceBase, ABC):
         return matches[np.argsort(matches[:, 0]), :]
 
 
-class NNLinearSumPowerMatcher(PowerDistanceBase, NNLinearSumBase):
+class NNLinearSumPowerMatcher(_PowerDistance, _NNLinearSumBase):
     """
     This is the Exhaustive-Hungarian Matching algorithm with the p-norm distance measure.
     """
     def __init__(self, p):
-        PowerDistanceBase.__init__(self, p)
+        _PowerDistance.__init__(self, p)
 
 
-class NNLinearSumCosineMatcher(CosineDistanceBase, NNLinearSumBase):
+class NNLinearSumMahalanobisMatcher(_MahalanobisDistance, _NNLinearSumBase):
+    """
+    This is the Exhaustive-Hungarian Matching algorithm with the mahalanobis distance measure.
+    """
+    pass
+
+
+class NNLinearSumCosineMatcher(_CosineDistance, _NNLinearSumBase):
     """
     This is the Exhaustive-Hungarian Matching algorithm with the cosine distance measure.
     """

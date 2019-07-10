@@ -2,7 +2,9 @@
 <html >
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1"><meta content="This is the Look-A-Like Model with custom distances" name="description" />
+<meta content="nearest neighbors, knn, mahalanobis, gradient boosting, look-a-like, lookalike, look a like" name="keywords" />
+
       <title>lal.core package</title>
     
       <link rel="stylesheet" href="_static/pygments.css">
@@ -22,6 +24,7 @@
     
   <link rel="index" title="Index" href="genindex.html" />
   <link rel="search" title="Search" href="search.html" />
+  <link rel="next" title="lal.spark package" href="lal.spark.html" />
   <link rel="prev" title="lal package" href="lal.html" /> 
   </head>
 
@@ -132,6 +135,12 @@
           </li>
 
         
+          <li class="toctree-l1 "><a href="lal.spark.html" class="reference internal ">lal.spark package</a>
+
+            
+          </li>
+
+        
       </ul>
     </div>
   
@@ -155,6 +164,10 @@
     <a href="lal.html"
        title="previous chapter">← lal package</a>
   </li>
+  <li class="next">
+    <a href="lal.spark.html"
+       title="next chapter">lal.spark package →</a>
+  </li>
 </ul>
   
 </div>
@@ -169,102 +182,31 @@
 <div class="section" id="module-lal.core.model">
 <span id="lal-core-model-module"></span><h2>lal.core.model module<a class="headerlink" href="#module-lal.core.model" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="lal.core.model.LALGBBaseModel">
-<em class="property">class </em><code class="sig-prename descclassname">lal.core.model.</code><code class="sig-name descname">LALGBBaseModel</code><span class="sig-paren">(</span><em class="sig-param">k</em>, <em class="sig-param">p</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBBaseModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>This is a base model to help generate the Look-A-Like fitting structure.</p>
-<p>Options for k is a non-negative integer, or linear_sum.
-Options for p is a nonzero float, or cosine.</p>
+<dt id="lal.core.model.LALGBClassifier">
+<em class="property">class </em><code class="sig-prename descclassname">lal.core.model.</code><code class="sig-name descname">LALGBClassifier</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBClassifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.model._LALGBBaseModel</span></code></p>
+<p>This is when our training labels are categorical.</p>
 <dl class="method">
-<dt id="lal.core.model.LALGBBaseModel.fit">
-<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">labels</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBBaseModel.fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>We use the weighter object to generate our weights, all according to which type of machine-learning task
-we are using.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>numpy.array</em>) – Our training data</p></li>
-<li><p><strong>labels</strong> (<em>numpy.array</em>) – Our 1D training labels</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
+<dt id="lal.core.model.LALGBClassifier.predict">
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBClassifier.predict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
-<dt id="lal.core.model.LALGBBaseModel.predict">
-<em class="property">abstract </em><code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">train_data</em>, <em class="sig-param">train_labels</em>, <em class="sig-param">test_data</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBBaseModel.predict" title="Permalink to this definition">¶</a></dt>
+<dt id="lal.core.model.LALGBClassifier.predict_proba">
+<code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="lal.core.model.LALGBClassifier">
-<em class="property">class </em><code class="sig-prename descclassname">lal.core.model.</code><code class="sig-name descname">LALGBClassifier</code><span class="sig-paren">(</span><em class="sig-param">k</em>, <em class="sig-param">p</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBClassifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lal.core.model.LALGBBaseModel" title="lal.core.model.LALGBBaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.model.LALGBBaseModel</span></code></a></p>
-<p>This is when our training labels are categorical.</p>
-<dl class="method">
-<dt id="lal.core.model.LALGBClassifier.predict">
-<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">train_data</em>, <em class="sig-param">train_labels</em>, <em class="sig-param">test_data</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBClassifier.predict" title="Permalink to this definition">¶</a></dt>
-<dd><p>We choose most probable label our samples in the testing dataset has.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>train_data</strong> (<em>numpy.array</em>) – The training dataset features</p></li>
-<li><p><strong>train_labels</strong> (<em>numpy.array</em>) – The training dataset labels</p></li>
-<li><p><strong>test_data</strong> (<em>numpy.array</em>) – The testing dataset features</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="lal.core.model.LALGBClassifier.predict_proba">
-<code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param">train_data</em>, <em class="sig-param">train_labels</em>, <em class="sig-param">test_data</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
-<dd><p>This predicts the probability of our test data having any of the available labels in the training dataset</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>train_data</strong> (<em>numpy.array</em>) – The training dataset features</p></li>
-<li><p><strong>train_labels</strong> (<em>numpy.array</em>) – The training dataset labels</p></li>
-<li><p><strong>test_data</strong> (<em>numpy.array</em>) – The testing dataset features</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
 <dt id="lal.core.model.LALGBRegressor">
-<em class="property">class </em><code class="sig-prename descclassname">lal.core.model.</code><code class="sig-name descname">LALGBRegressor</code><span class="sig-paren">(</span><em class="sig-param">k</em>, <em class="sig-param">p</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBRegressor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lal.core.model.LALGBBaseModel" title="lal.core.model.LALGBBaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.model.LALGBBaseModel</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">lal.core.model.</code><code class="sig-name descname">LALGBRegressor</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBRegressor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.model._LALGBBaseModel</span></code></p>
 <p>This is when our training labels are continuous.</p>
 <dl class="method">
 <dt id="lal.core.model.LALGBRegressor.predict">
-<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">train_data</em>, <em class="sig-param">train_labels</em>, <em class="sig-param">test_data</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBRegressor.predict" title="Permalink to this definition">¶</a></dt>
-<dd><p>We predict the possible value our testing dataset will have, based on the continuous variables.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>train_data</strong> (<em>numpy.array</em>) – The training dataset features</p></li>
-<li><p><strong>train_labels</strong> (<em>numpy.array</em>) – The training dataset labels</p></li>
-<li><p><strong>test_data</strong> (<em>numpy.array</em>) – The testing dataset features</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBRegressor.predict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -272,184 +214,62 @@ we are using.</p>
 <div class="section" id="module-lal.core.nn">
 <span id="lal-core-nn-module"></span><h2>lal.core.nn module<a class="headerlink" href="#module-lal.core.nn" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="lal.core.nn.CosineDistanceBase">
-<em class="property">class </em><code class="sig-prename descclassname">lal.core.nn.</code><code class="sig-name descname">CosineDistanceBase</code><a class="headerlink" href="#lal.core.nn.CosineDistanceBase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lal.core.nn.DistanceBase" title="lal.core.nn.DistanceBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn.DistanceBase</span></code></a></p>
-<p>This uses the cosine distance.</p>
-<dl class="method">
-<dt id="lal.core.nn.CosineDistanceBase.calc_dist">
-<code class="sig-name descname">calc_dist</code><span class="sig-paren">(</span><em class="sig-param">mat1</em>, <em class="sig-param">mat2</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.nn.CosineDistanceBase.calc_dist" title="Permalink to this definition">¶</a></dt>
-<dd><p>This calculates the distance</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>mat1</strong> (<em>numpy.array</em>) – Sample 1</p></li>
-<li><p><strong>mat2</strong> (<em>numpy.array</em>) – Sample 2</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="lal.core.nn.DistanceBase">
-<em class="property">class </em><code class="sig-prename descclassname">lal.core.nn.</code><code class="sig-name descname">DistanceBase</code><a class="headerlink" href="#lal.core.nn.DistanceBase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>This is our base distance class.</p>
-<dl class="method">
-<dt id="lal.core.nn.DistanceBase.calc_dist">
-<em class="property">abstract </em><code class="sig-name descname">calc_dist</code><span class="sig-paren">(</span><em class="sig-param">mat1</em>, <em class="sig-param">mat2</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.nn.DistanceBase.calc_dist" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="lal.core.nn.KNNBase">
-<em class="property">class </em><code class="sig-prename descclassname">lal.core.nn.</code><code class="sig-name descname">KNNBase</code><span class="sig-paren">(</span><em class="sig-param">k</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.nn.KNNBase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lal.core.nn.DistanceBase" title="lal.core.nn.DistanceBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn.DistanceBase</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
-<p>This is another abstract class for our k-nearest neighbors algorithm</p>
-<dl class="method">
-<dt id="lal.core.nn.KNNBase.match">
-<code class="sig-name descname">match</code><span class="sig-paren">(</span><em class="sig-param">mat1</em>, <em class="sig-param">mat2</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.nn.KNNBase.match" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given the memory-related issues with the algorithm.  We create a batch process and calculate the distances
-on a batch of our samples, and generate our matches on that batch.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>mat1</strong> (<em>numpy.array</em>) – Sample 1</p></li>
-<li><p><strong>mat2</strong> (<em>numpy.array</em>) – Sample 2</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
 <dt id="lal.core.nn.KNNCosineMatcher">
 <em class="property">class </em><code class="sig-prename descclassname">lal.core.nn.</code><code class="sig-name descname">KNNCosineMatcher</code><span class="sig-paren">(</span><em class="sig-param">k</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.nn.KNNCosineMatcher" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lal.core.nn.CosineDistanceBase" title="lal.core.nn.CosineDistanceBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn.CosineDistanceBase</span></code></a>, <a class="reference internal" href="#lal.core.nn.KNNBase" title="lal.core.nn.KNNBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn.KNNBase</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._CosineDistance</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._KNNBase</span></code></p>
 <p>This is the K-Nearest Neighbor algorithm with the cosine distance measure.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lal.core.nn.KNNMahalanobisMatcher">
+<em class="property">class </em><code class="sig-prename descclassname">lal.core.nn.</code><code class="sig-name descname">KNNMahalanobisMatcher</code><span class="sig-paren">(</span><em class="sig-param">k</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.nn.KNNMahalanobisMatcher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._MahalanobisDistance</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._KNNBase</span></code></p>
+<p>This is the K-Nearest Neighbor algorithm with the mahalanobis distance measure.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="lal.core.nn.KNNPowerMatcher">
 <em class="property">class </em><code class="sig-prename descclassname">lal.core.nn.</code><code class="sig-name descname">KNNPowerMatcher</code><span class="sig-paren">(</span><em class="sig-param">k</em>, <em class="sig-param">p</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.nn.KNNPowerMatcher" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lal.core.nn.PowerDistanceBase" title="lal.core.nn.PowerDistanceBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn.PowerDistanceBase</span></code></a>, <a class="reference internal" href="#lal.core.nn.KNNBase" title="lal.core.nn.KNNBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn.KNNBase</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._PowerDistance</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._KNNBase</span></code></p>
 <p>This is the K-Nearest Neighbor algorithm with the p-norm distance measure.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="lal.core.nn.NNLinearSumBase">
-<em class="property">class </em><code class="sig-prename descclassname">lal.core.nn.</code><code class="sig-name descname">NNLinearSumBase</code><a class="headerlink" href="#lal.core.nn.NNLinearSumBase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lal.core.nn.DistanceBase" title="lal.core.nn.DistanceBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn.DistanceBase</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
-<p>This is the abstract class for the Hungarian Matching Algorithm, where we use the algorithm to exhaust all the
-unique matches between our samples</p>
-<dl class="method">
-<dt id="lal.core.nn.NNLinearSumBase.match">
-<code class="sig-name descname">match</code><span class="sig-paren">(</span><em class="sig-param">mat1</em>, <em class="sig-param">mat2</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.nn.NNLinearSumBase.match" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get all samples in mat2 to match to mat1 by using the linear_sum_assignment.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>mat1</strong> (<em>numpy.array</em>) – Sample 1</p></li>
-<li><p><strong>mat2</strong> (<em>numpy.array</em>) – Sample 2</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="class">
 <dt id="lal.core.nn.NNLinearSumCosineMatcher">
 <em class="property">class </em><code class="sig-prename descclassname">lal.core.nn.</code><code class="sig-name descname">NNLinearSumCosineMatcher</code><a class="headerlink" href="#lal.core.nn.NNLinearSumCosineMatcher" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lal.core.nn.CosineDistanceBase" title="lal.core.nn.CosineDistanceBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn.CosineDistanceBase</span></code></a>, <a class="reference internal" href="#lal.core.nn.NNLinearSumBase" title="lal.core.nn.NNLinearSumBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn.NNLinearSumBase</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._CosineDistance</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._NNLinearSumBase</span></code></p>
 <p>This is the Exhaustive-Hungarian Matching algorithm with the cosine distance measure.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lal.core.nn.NNLinearSumMahalanobisMatcher">
+<em class="property">class </em><code class="sig-prename descclassname">lal.core.nn.</code><code class="sig-name descname">NNLinearSumMahalanobisMatcher</code><a class="headerlink" href="#lal.core.nn.NNLinearSumMahalanobisMatcher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._MahalanobisDistance</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._NNLinearSumBase</span></code></p>
+<p>This is the Exhaustive-Hungarian Matching algorithm with the mahalanobis distance measure.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="lal.core.nn.NNLinearSumPowerMatcher">
 <em class="property">class </em><code class="sig-prename descclassname">lal.core.nn.</code><code class="sig-name descname">NNLinearSumPowerMatcher</code><span class="sig-paren">(</span><em class="sig-param">p</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.nn.NNLinearSumPowerMatcher" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lal.core.nn.PowerDistanceBase" title="lal.core.nn.PowerDistanceBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn.PowerDistanceBase</span></code></a>, <a class="reference internal" href="#lal.core.nn.NNLinearSumBase" title="lal.core.nn.NNLinearSumBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn.NNLinearSumBase</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._PowerDistance</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._NNLinearSumBase</span></code></p>
 <p>This is the Exhaustive-Hungarian Matching algorithm with the p-norm distance measure.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="lal.core.nn.PowerDistanceBase">
-<em class="property">class </em><code class="sig-prename descclassname">lal.core.nn.</code><code class="sig-name descname">PowerDistanceBase</code><span class="sig-paren">(</span><em class="sig-param">p</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.nn.PowerDistanceBase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lal.core.nn.DistanceBase" title="lal.core.nn.DistanceBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn.DistanceBase</span></code></a></p>
-<p>This is the distance class that uses the p-norm to generate our distances.</p>
-<dl class="method">
-<dt id="lal.core.nn.PowerDistanceBase.calc_dist">
-<code class="sig-name descname">calc_dist</code><span class="sig-paren">(</span><em class="sig-param">mat1</em>, <em class="sig-param">mat2</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.nn.PowerDistanceBase.calc_dist" title="Permalink to this definition">¶</a></dt>
-<dd><p>This calculates the distance</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>mat1</strong> (<em>numpy.array</em>) – Sample 1</p></li>
-<li><p><strong>mat2</strong> (<em>numpy.array</em>) – Sample 2</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </div>
 <div class="section" id="module-lal.core.weights">
 <span id="lal-core-weights-module"></span><h2>lal.core.weights module<a class="headerlink" href="#module-lal.core.weights" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="lal.core.weights.LGBMClassifierWeight">
-<em class="property">class </em><code class="sig-prename descclassname">lal.core.weights.</code><code class="sig-name descname">LGBMClassifierWeight</code><a class="headerlink" href="#lal.core.weights.LGBMClassifierWeight" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lal.core.weights.LGBMWeightsBase" title="lal.core.weights.LGBMWeightsBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.weights.LGBMWeightsBase</span></code></a></p>
+<dt id="lal.core.weights.GBMClassifierWeight">
+<em class="property">class </em><code class="sig-prename descclassname">lal.core.weights.</code><code class="sig-name descname">GBMClassifierWeight</code><a class="headerlink" href="#lal.core.weights.GBMClassifierWeight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.weights._GBMWeightsBase</span></code></p>
 <p>This is for our classification-task</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="lal.core.weights.LGBMRegressorWeight">
-<em class="property">class </em><code class="sig-prename descclassname">lal.core.weights.</code><code class="sig-name descname">LGBMRegressorWeight</code><a class="headerlink" href="#lal.core.weights.LGBMRegressorWeight" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lal.core.weights.LGBMWeightsBase" title="lal.core.weights.LGBMWeightsBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.weights.LGBMWeightsBase</span></code></a></p>
+<dt id="lal.core.weights.GBMRegressorWeight">
+<em class="property">class </em><code class="sig-prename descclassname">lal.core.weights.</code><code class="sig-name descname">GBMRegressorWeight</code><a class="headerlink" href="#lal.core.weights.GBMRegressorWeight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.weights._GBMWeightsBase</span></code></p>
 <p>This is for our regression-task.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="lal.core.weights.LGBMWeightsBase">
-<em class="property">class </em><code class="sig-prename descclassname">lal.core.weights.</code><code class="sig-name descname">LGBMWeightsBase</code><span class="sig-paren">(</span><em class="sig-param">metric_name</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.weights.LGBMWeightsBase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>This is our base class to help generate our importance weights for our features by using the feature_importance
-from the gradient boosting method.</p>
-<dl class="method">
-<dt id="lal.core.weights.LGBMWeightsBase.get_feature_importances">
-<code class="sig-name descname">get_feature_importances</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">labels</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.weights.LGBMWeightsBase.get_feature_importances" title="Permalink to this definition">¶</a></dt>
-<dd><p>After optimizing the model, we fit on the whole dataset, parse the feature_importance attribute and scale it
-to sum to one.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>numpy.array</em>) – Our training data</p></li>
-<li><p><strong>labels</strong> (<em>numpy.array</em>) – Our 1D training labels</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -465,6 +285,10 @@ to sum to one.</p>
   <li class="prev">
     <a href="lal.html"
        title="previous chapter">← lal package</a>
+  </li>
+  <li class="next">
+    <a href="lal.spark.html"
+       title="next chapter">lal.spark package →</a>
   </li>
 </ul><div class="footer" role="contentinfo">
       &#169; Copyright 2019, Edward Turner.

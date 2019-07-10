@@ -1,6 +1,11 @@
 lal.core package
 ================
 
+.. meta::
+   :description: This is the Look-A-Like Model with custom distances
+   :keywords: nearest neighbors, knn, mahalanobis, gradient boosting, look-a-like, lookalike, look a like
+
+
 Submodules
 ----------
 

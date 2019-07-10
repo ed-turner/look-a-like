@@ -6,8 +6,12 @@ from sklearn.base import TransformerMixin
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
-from .nn import KNNPowerMatcher, KNNCosineMatcher, NNLinearSumCosineMatcher, NNLinearSumPowerMatcher
-from .weights import LGBMClassifierWeight, LGBMRegressorWeight
+# this is for the utility of logging and type assertion
+from lal.utils.logger import LALLogger
+from lal.utils.asserts import AssertArgumentNDArray
+
+from .nn import KNNPowerMatcher, KNNCosineMatcher, NNLinearSumCosineMatcher, NNLinearSumPowerMatcher, KNNMahalanobisMatcher, NNLinearSumMahalanobisMatcher
+from .weights import GBMClassifierWeight, GBMRegressorWeight
 
 
 class _Scaler(TransformerMixin):
@@ -31,13 +35,21 @@ class _Scaler(TransformerMixin):
             raise ValueError("The shape of the scaling factors and the input data is not the same")
 
 
-class LALGBBaseModel(metaclass=ABCMeta):
+class _LALGBBaseModel(metaclass=ABCMeta):
     """
     This is a base model to help generate the Look-A-Like fitting structure.
 
     Options for k is a non-negative integer, or linear_sum.
     Options for p is a nonzero float, or cosine.
     """
+
+    lal_logger = LALLogger(__name__)
+    assertor = AssertArgumentNDArray()
+
+    lal_logger.__doc__ = "This is the Look-A-Like Class Level Logger, which helps log events at different levels to " \
+                         "the console."
+    assertor.__doc__ = "This is the Look-A-Like class level argument assertion"
+
     def __init__(self, k, p):
 
         if isinstance(p, float):
@@ -55,12 +67,22 @@ class LALGBBaseModel(metaclass=ABCMeta):
                 self.matcher = NNLinearSumCosineMatcher()
             else:
                 raise ValueError("This type matcher is not supported")
+
+        elif p == 'mahalanbois':
+            if isinstance(k, int):
+                self.matcher = KNNMahalanobisMatcher(k)
+            elif k == "linear_sum":
+                self.matcher = NNLinearSumMahalanobisMatcher()
+            else:
+                raise ValueError("This type matcher is not supported")
         else:
             raise ValueError("This distance is not supported")
 
         self.model = None
         self.weighter = None
 
+    @lal_logger.log_error
+    @assertor.assert_arguments
     def fit(self, data, labels):
         """
         We use the weighter object to generate our weights, all according to which type of machine-learning task
@@ -78,8 +100,10 @@ class LALGBBaseModel(metaclass=ABCMeta):
         if weighter is None:
             raise NotImplementedError("You need to assign a weighter object to this class to use it.")
 
+        self.lal_logger.info("Deriving feature importance weights")
         weighter.get_feature_importances(data, labels)
 
+        self.lal_logger.info("Constructing scaling pipeline")
         pipeline = Pipeline([("standard_scalar", StandardScaler()),
                              ("feature_scaler", _Scaler(weighter.feature_importances))])
 
@@ -115,15 +139,18 @@ class LALGBBaseModel(metaclass=ABCMeta):
         pass
 
 
-class LALGBClassifier(LALGBBaseModel):
+class LALGBClassifier(_LALGBBaseModel):
     """
     This is when our training labels are categorical.
     """
-    def __init__(self, k, p):
-        super().__init__(k, p)
 
-        self.weighter = LGBMClassifierWeight()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
+        self.weighter = GBMClassifierWeight()
+
+    @_LALGBBaseModel.lal_logger.log_error
+    @_LALGBBaseModel.assertor.assert_arguments
     def predict_proba(self, train_data, train_labels, test_data):
         """
         This predicts the probability of our test data having any of the available labels in the training dataset
@@ -137,12 +164,14 @@ class LALGBClassifier(LALGBBaseModel):
         :return:
         """
 
+        self.lal_logger.info("Scaling data and creating matches")
         matches = self._get_matches(train_data, test_data).astype(np.int64)
 
         # all nonzero labels
         unique_labels = np.unique(train_labels)
         num_labels = unique_labels.shape[0]
 
+        self.lal_logger.info("Performing predictions")
         if num_labels == 2:
             preds = np.zeros((test_data.shape[0], 1))
 
@@ -163,6 +192,8 @@ class LALGBClassifier(LALGBBaseModel):
 
         return preds
 
+    @_LALGBBaseModel.lal_logger.log_error
+    @_LALGBBaseModel.assertor.assert_arguments
     def predict(self, train_data, train_labels, test_data):
         """
         We choose most probable label our samples in the testing dataset has.
@@ -176,20 +207,25 @@ class LALGBClassifier(LALGBBaseModel):
         :return:
         """
 
+        self.lal_logger.info("Generating probabilities")
         probs = self.predict_proba(train_data, train_labels, test_data)
 
+        self.lal_logger.info("Hard-Prediction on probabilities")
         return np.argmax(probs, axis=1) + 1
 
 
-class LALGBRegressor(LALGBBaseModel):
+class LALGBRegressor(_LALGBBaseModel):
     """
     This is when our training labels are continuous.
     """
-    def __init__(self, k, p):
-        super().__init__(k, p)
 
-        self.weighter = LGBMRegressorWeight()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
+        self.weighter = GBMRegressorWeight()
+
+    @_LALGBBaseModel.lal_logger.log_error
+    @_LALGBBaseModel.assertor.assert_arguments
     def predict(self, train_data, train_labels, test_data):
         """
         We predict the possible value our testing dataset will have, based on the continuous variables.
@@ -203,6 +239,7 @@ class LALGBRegressor(LALGBBaseModel):
         :return:
         """
 
+        self.lal_logger.info("Scaling data and creating matches")
         matches = self._get_matches(train_data, test_data).astype(np.int64)
 
         preds = np.zeros((test_data.shape[0], 1))

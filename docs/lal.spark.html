@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1"><meta content="This is the Look-A-Like Model with custom distances in spark" name="description" />
+<meta content="apache-spark, nearest neighbors, knn, mahalanobis, gradient boosting, look-a-like, lookalike, look a like" name="keywords" />
+
+      <title>lal.spark package</title>
+    
+      <link rel="stylesheet" href="_static/pygments.css">
+      <link rel="stylesheet" href="_static/theme.css">
+      
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+
+      <!-- sphinx script_files -->
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+
+      
+      <script src="_static/theme-vendors.js"></script>
+      <script src="_static/theme.js" defer></script>
+    
+  <link rel="index" title="Index" href="genindex.html" />
+  <link rel="search" title="Search" href="search.html" />
+  <link rel="prev" title="lal.core package" href="lal.core.html" /> 
+  </head>
+
+  <body><div id="app" class="theme-container" :class="pageClasses"><navbar @toggle-sidebar="toggleSidebar">
+  <router-link to="index.html" class="home-link">
+    
+      <span class="site-name">Look-A-Like</span>
+    
+  </router-link>
+
+  <div class="links">
+    <navlinks class="can-hide">
+
+  
+    <div class="nav-item">
+      <a href="index.html#welcome-to-look-a-like-s-python-package-documentation"
+         class="nav-link ">
+         Contents:
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="lal.html#subpackages"
+         class="nav-link  router-link-active">
+         lal package
+      </a>
+    </div>
+  
+
+
+
+    </navlinks>
+  </div>
+</navbar>
+
+      
+      <div class="sidebar-mask" @click="toggleSidebar(false)">
+      </div>
+        <sidebar @toggle-sidebar="toggleSidebar">
+          
+          <navlinks>
+            
+
+  
+    <div class="nav-item">
+      <a href="index.html#welcome-to-look-a-like-s-python-package-documentation"
+         class="nav-link ">
+         Contents:
+      </a>
+    </div>
+  
+    <div class="nav-item">
+      <a href="lal.html#subpackages"
+         class="nav-link  router-link-active">
+         lal package
+      </a>
+    </div>
+  
+
+
+
+            
+          </navlinks><div id="searchbox" class="searchbox" role="search">
+  <div class="caption"><span class="caption-text">Quick search</span>
+    <div class="searchformwrapper">
+      <form class="search" action="search.html" method="get">
+        <input type="text" name="q" />
+        <input type="submit" value="Search" />
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div><div class="sidebar-links" role="navigation" aria-label="main navigation">
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="index.html#welcome-to-look-a-like-s-python-package-documentation">Contents:</a></span>
+      </p>
+      <ul class="">
+        
+      </ul>
+    </div>
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="lal.html#subpackages">lal package</a></span>
+      </p>
+      <ul class="current">
+        
+          <li class="toctree-l1 "><a href="lal.core.html" class="reference internal ">lal.core package</a>
+
+            
+          </li>
+
+        
+          <li class="toctree-l1 current"><a href="#" class="reference internal current">lal.spark package</a>
+
+            
+              <ul>
+                
+                  <li class="toctree-l2"><a href="#submodules" class="reference internal">Submodules</a></li>
+                
+                  <li class="toctree-l2"><a href="#module-lal.spark.model" class="reference internal">lal.spark.model module</a></li>
+                
+                  <li class="toctree-l2"><a href="#module-lal.spark.nn" class="reference internal">lal.spark.nn module</a></li>
+                
+                  <li class="toctree-l2"><a href="#module-lal.spark.weights" class="reference internal">lal.spark.weights module</a></li>
+                
+                  <li class="toctree-l2"><a href="#module-lal.spark" class="reference internal">Module contents</a></li>
+                
+              </ul>
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+</div>
+        </sidebar>
+
+      <page>
+          <div class="body-header" role="navigation" aria-label="navigation">
+  
+  <ul class="breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+    
+      <li><a href="lal.html">lal package</a> &raquo;</li>
+    
+    <li>lal.spark package</li>
+  </ul>
+  
+
+  <ul class="page-nav">
+  <li class="prev">
+    <a href="lal.core.html"
+       title="previous chapter">← lal.core package</a>
+  </li>
+</ul>
+  
+</div>
+<hr>
+          <div class="content" role="main">
+            
+  <div class="section" id="lal-spark-package">
+<h1>lal.spark package<a class="headerlink" href="#lal-spark-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-lal.spark.model">
+<span id="lal-spark-model-module"></span><h2>lal.spark.model module<a class="headerlink" href="#module-lal.spark.model" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lal.spark.model.LALGBSparkBinaryClassifier">
+<em class="property">class </em><code class="sig-prename descclassname">lal.spark.model.</code><code class="sig-name descname">LALGBSparkBinaryClassifier</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkBinaryClassifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.model._LALModelBase</span></code></p>
+<p>This is when our training labels are binary.</p>
+<dl class="method">
+<dt id="lal.spark.model.LALGBSparkBinaryClassifier.predict">
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkBinaryClassifier.predict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lal.spark.model.LALGBSparkBinaryClassifier.predict_proba">
+<code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkBinaryClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lal.spark.model.LALGBSparkMultiClassifier">
+<em class="property">class </em><code class="sig-prename descclassname">lal.spark.model.</code><code class="sig-name descname">LALGBSparkMultiClassifier</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiClassifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.model._LALModelBase</span></code></p>
+<p>This is when our training labels are categorical.</p>
+<dl class="method">
+<dt id="lal.spark.model.LALGBSparkMultiClassifier.predict">
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiClassifier.predict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lal.spark.model.LALGBSparkMultiClassifier.predict_proba">
+<code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lal.spark.model.LALGBSparkRegressor">
+<em class="property">class </em><code class="sig-prename descclassname">lal.spark.model.</code><code class="sig-name descname">LALGBSparkRegressor</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkRegressor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.model._LALModelBase</span></code></p>
+<p>This is when our training labels are continuous.</p>
+<dl class="method">
+<dt id="lal.spark.model.LALGBSparkRegressor.predict">
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkRegressor.predict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-lal.spark.nn">
+<span id="lal-spark-nn-module"></span><h2>lal.spark.nn module<a class="headerlink" href="#module-lal.spark.nn" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lal.spark.nn.KNNCosineMatcher">
+<em class="property">class </em><code class="sig-prename descclassname">lal.spark.nn.</code><code class="sig-name descname">KNNCosineMatcher</code><span class="sig-paren">(</span><em class="sig-param">k</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.nn.KNNCosineMatcher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.nn._CosineDistance</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.nn._KNNMatcherBase</span></code></p>
+<p>This is the K-Nearest Neighbor algorithm with the cosine distance measure.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lal.spark.nn.KNNMahalanobisMatcher">
+<em class="property">class </em><code class="sig-prename descclassname">lal.spark.nn.</code><code class="sig-name descname">KNNMahalanobisMatcher</code><span class="sig-paren">(</span><em class="sig-param">k</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.nn.KNNMahalanobisMatcher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.nn._MahalanobisDistance</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.nn._KNNMatcherBase</span></code></p>
+<p>This is the K-Nearest Neighbor algorithm with the mahalanobis distance measure.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lal.spark.nn.KNNPowerMatcher">
+<em class="property">class </em><code class="sig-prename descclassname">lal.spark.nn.</code><code class="sig-name descname">KNNPowerMatcher</code><span class="sig-paren">(</span><em class="sig-param">p</em>, <em class="sig-param">k</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.nn.KNNPowerMatcher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.nn._PowerDistance</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.nn._KNNMatcherBase</span></code></p>
+<p>This is the K-Nearest Neighbor algorithm with the p-norm distance measure.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-lal.spark.weights">
+<span id="lal-spark-weights-module"></span><h2>lal.spark.weights module<a class="headerlink" href="#module-lal.spark.weights" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lal.spark.weights.GBMWeightBinaryClassifier">
+<em class="property">class </em><code class="sig-prename descclassname">lal.spark.weights.</code><code class="sig-name descname">GBMWeightBinaryClassifier</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.weights.GBMWeightBinaryClassifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.weights._LGBMWeightsBase</span></code></p>
+<p>This object will derive the feature importance weights based on binary output.  It will optimize the
+Gradient Boosting Model based on a classification metric, and then return the featureImportances based on the most
+optimized result.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lal.spark.weights.GBMWeightMultiClassifier">
+<em class="property">class </em><code class="sig-prename descclassname">lal.spark.weights.</code><code class="sig-name descname">GBMWeightMultiClassifier</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.weights.GBMWeightMultiClassifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.weights._LGBMWeightsBase</span></code></p>
+<p>This object will derive the feature importance weights based on a multiclass output.  It will optimize the
+Gradient Boosting Model based on a classification metric, and then return the featureImportances based on the most
+optimized result.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lal.spark.weights.GBMWeightRegressor">
+<em class="property">class </em><code class="sig-prename descclassname">lal.spark.weights.</code><code class="sig-name descname">GBMWeightRegressor</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.weights.GBMWeightRegressor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.weights._LGBMWeightsBase</span></code></p>
+<p>This object will derive the feature importance weights based on a continuous output.  It will optimize the
+Gradient Boosting Model based on a regression metric, and then return the featureImportances based on the most
+optimized result.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-lal.spark">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-lal.spark" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          <div class="page-nav">
+            <div class="inner"><ul class="page-nav">
+  <li class="prev">
+    <a href="lal.core.html"
+       title="previous chapter">← lal.core package</a>
+  </li>
+</ul><div class="footer" role="contentinfo">
+      &#169; Copyright 2019, Edward Turner.
+    <br>
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.2 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
+</div>
+            </div>
+          </div>
+      </page>
+  </div></body>
+</html>
