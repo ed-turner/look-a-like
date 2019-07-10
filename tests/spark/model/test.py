@@ -77,6 +77,7 @@ class TestLALGBSparkBinaryClassifier(PySparkTestFramework):
 
         self.logger.info("SUCCESS")
 
+
 if __name__ == "__main__":
 
     unittest.main()

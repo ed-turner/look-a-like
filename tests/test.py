@@ -4,7 +4,7 @@ import unittest
 from .core.nn.test import TestKNNPowerMatcher, TestKNNCosineMatcher, TestKNNMahalanobisMatcher
 
 try:
-    from .spark.weights.test import TestWeighter
+    from .spark.weights.test import TestGBMWeightClassifier, TestGBMWeightRegressor
     from .spark.nn.test import TestKNNSparkPowerMatcher, TestKNNSparkCosineMatcher, TestKNNSparkMahalanobisMatcher
 except ImportError:
     warnings.warn("The spark package was not installed in this installation.. If you want to have spark implementation"

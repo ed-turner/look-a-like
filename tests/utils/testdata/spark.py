@@ -45,9 +45,24 @@ class PySparkTestData:
         df1["pred"] = df1["v1"].apply(lambda x: x.sum())
         df1["pred_clf"] = df1["pred"].apply(tmp)
 
+        def tmp(x):
+            _x = np.exp(x)
+
+            _x = _x / (1 + _x)
+
+            if _x < (1.0 / 3.0):
+                return 1
+            elif _x < (2.0 / 3.0):
+                return 2
+            else:
+                return 3
+
+        df1["pred_multi"] = df1["pred"].apply(tmp)
+
         sdf1 = self.spark.createDataFrame(df1)
 
-        sdf2 = sdf1.withColumnRenamed("id1", "id2").withColumnRenamed("v1", "v2").drop("pred")
+        sdf2 = sdf1.withColumnRenamed("id1", "id2").withColumnRenamed("v1", "v2")\
+            .drop("pred").drop("pred_clf").drop("pred_multi")
 
         return sdf1, sdf2
 
@@ -63,9 +78,35 @@ class PySparkTestData:
 
         df1["pred"] = df1[["col_{}".format(i) for i in range(1, 5)]].sum(axis=1)
 
+        def tmp(x):
+            _x = np.exp(x)
+
+            _x = _x / (1 + _x)
+
+            if _x < 0.5:
+                return 0
+            else:
+                return 1
+
+        df1["pred_clf"] = df1["pred"].apply(tmp)
+
+        def tmp(x):
+            _x = np.exp(x)
+
+            _x = _x / (1 + _x)
+
+            if _x < (1.0 / 3.0):
+                return 1
+            elif _x < (2.0 / 3.0):
+                return 2
+            else:
+                return 3
+
+        df1["pred_multi"] = df1["pred"].apply(tmp)
+
         sdf1 = self.spark.createDataFrame(df1)
 
-        sdf2 = self.spark.createDataFrame(df1.drop("pred", axis=1))
+        sdf2 = self.spark.createDataFrame(df1.drop(["pred", "pred_clf", "pred_multi"], axis=1))
 
         return sdf1, sdf2
 
