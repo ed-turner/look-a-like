@@ -10,7 +10,7 @@ from lal.spark.nn import KNNPowerMatcher, KNNMahalanobisMatcher, KNNCosineMatche
 from lal.utils.logger import LALLogger
 
 
-class TestKNNPowerMatcher(PySparkTestFramework):
+class TestKNNSparkPowerMatcher(PySparkTestFramework):
 
     logger = LALLogger("test_knn_power_matcher")
 
@@ -73,7 +73,7 @@ class TestKNNPowerMatcher(PySparkTestFramework):
         assert np.allclose(dists, scipy_dist)
 
 
-class TestKNNMahalanobisMatcher(PySparkTestFramework):
+class TestKNNSparkMahalanobisMatcher(PySparkTestFramework):
 
     logger = LALLogger("test_knn_mahalanobis_matcher")
 
@@ -132,7 +132,7 @@ class TestKNNMahalanobisMatcher(PySparkTestFramework):
         assert np.allclose(dists, scipy_dist)
 
 
-class TestKNNCosineMatcher(PySparkTestFramework):
+class TestKNNSparkCosineMatcher(PySparkTestFramework):
 
     logger = LALLogger("test_knn_cosine_matcher")
 
