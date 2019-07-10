@@ -189,12 +189,38 @@
 <dl class="method">
 <dt id="lal.core.model.LALGBClassifier.predict">
 <code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBClassifier.predict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>We choose most probable label our samples in the testing dataset has.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<em>numpy.array</em>) – The training dataset features</p></li>
+<li><p><strong>train_labels</strong> (<em>numpy.array</em>) – The training dataset labels</p></li>
+<li><p><strong>test_data</strong> (<em>numpy.array</em>) – The testing dataset features</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="lal.core.model.LALGBClassifier.predict_proba">
 <code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>This predicts the probability of our test data having any of the available labels in the training dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<em>numpy.array</em>) – The training dataset features</p></li>
+<li><p><strong>train_labels</strong> (<em>numpy.array</em>) – The training dataset labels</p></li>
+<li><p><strong>test_data</strong> (<em>numpy.array</em>) – The testing dataset features</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -206,7 +232,20 @@
 <dl class="method">
 <dt id="lal.core.model.LALGBRegressor.predict">
 <code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBRegressor.predict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>We predict the possible value our testing dataset will have, based on the continuous variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<em>numpy.array</em>) – The training dataset features</p></li>
+<li><p><strong>train_labels</strong> (<em>numpy.array</em>) – The training dataset labels</p></li>
+<li><p><strong>test_data</strong> (<em>numpy.array</em>) – The testing dataset features</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

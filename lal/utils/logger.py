@@ -138,5 +138,6 @@ class LALLogger:
 
         # making sure the name of the funct did not change
         decorated.__name__ = funct.__name__
+        decorated.__doc__ = funct.__doc__
 
         return decorated

@@ -184,12 +184,36 @@
 <dl class="method">
 <dt id="lal.spark.model.LALGBSparkBinaryClassifier.predict">
 <code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkBinaryClassifier.predict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>We choose most probable label our samples in the testing dataset has.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf1</strong> (<em>pyspark.sql.dataframe.DataFrame</em>) – The training dataset</p></li>
+<li><p><strong>sdf2</strong> (<em>pyspark.sql.dataframe.DataFrame</em>) – The testing dataset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="lal.spark.model.LALGBSparkBinaryClassifier.predict_proba">
 <code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkBinaryClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>This predicts the probability of our test data having any of the available labels in the training dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf1</strong> (<em>pyspark.sql.dataframe.DataFrame</em>) – The training dataset</p></li>
+<li><p><strong>sdf2</strong> (<em>pyspark.sql.dataframe.DataFrame</em>) – The testing dataset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -201,12 +225,36 @@
 <dl class="method">
 <dt id="lal.spark.model.LALGBSparkMultiClassifier.predict">
 <code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiClassifier.predict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>We choose most probable label our samples in the testing dataset has.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf1</strong> (<em>pyspark.sql.dataframe.DataFrame</em>) – The training dataset</p></li>
+<li><p><strong>sdf2</strong> (<em>pyspark.sql.dataframe.DataFrame</em>) – The testing dataset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="lal.spark.model.LALGBSparkMultiClassifier.predict_proba">
 <code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>This predicts the probability of our test data having any of the available labels in the training dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf1</strong> (<em>pyspark.sql.dataframe.DataFrame</em>) – The training dataset</p></li>
+<li><p><strong>sdf2</strong> (<em>pyspark.sql.dataframe.DataFrame</em>) – The testing dataset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -218,7 +266,19 @@
 <dl class="method">
 <dt id="lal.spark.model.LALGBSparkRegressor.predict">
 <code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkRegressor.predict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>We predict the possible value our testing dataset will have, based on the continuous variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf1</strong> (<em>pyspark.sql.dataframe.DataFrame</em>) – The training dataset</p></li>
+<li><p><strong>sdf2</strong> (<em>pyspark.sql.dataframe.DataFrame</em>) – The testing dataset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

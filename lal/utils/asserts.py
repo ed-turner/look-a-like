@@ -36,6 +36,7 @@ class AssertArgumentTypeBase:
             return funct(*args, **kwargs)
 
         decorated.__name__ = funct.__name__
+        decorated.__doc__ = funct.__doc__
 
         return decorated
 
