@@ -25,7 +25,7 @@ class TestGBMWeightRegressor(PySparkTestFramework):
 
         sdf1, sdf2 = generator.get_weight_data()
 
-        model = GBMWeightRegressor(feature_col='v1', label_col='pred')
+        model = GBMWeightRegressor(feature_col='v1', label_col='pred', optimize=False)
 
         self.logger.info("Trying to see if fitting one model works...")
         try:
@@ -73,7 +73,7 @@ class TestGBMWeightClassifier(PySparkTestFramework):
 
         sdf1, sdf2 = generator.get_weight_data()
 
-        model = GBMWeightBinaryClassifier(feature_col='v1', label_col='pred_clf')
+        model = GBMWeightBinaryClassifier(feature_col='v1', label_col='pred_clf', optimize=False)
 
         self.logger.info("Trying to see if fitting one model works...")
         try:
