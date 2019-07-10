@@ -11,7 +11,7 @@ from lal.utils.logger import LALLogger
 from lal.utils.asserts import AssertArgumentNDArray
 
 from .nn import KNNPowerMatcher, KNNCosineMatcher, NNLinearSumCosineMatcher, NNLinearSumPowerMatcher, KNNMahalanobisMatcher, NNLinearSumMahalanobisMatcher
-from .weights import LGBMClassifierWeight, LGBMRegressorWeight
+from .weights import GBMClassifierWeight, GBMRegressorWeight
 
 
 class _Scaler(TransformerMixin):
@@ -147,7 +147,7 @@ class LALGBClassifier(_LALGBBaseModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.weighter = LGBMClassifierWeight()
+        self.weighter = GBMClassifierWeight()
 
     @_LALGBBaseModel.lal_logger.log_error
     @_LALGBBaseModel.assertor.assert_arguments
@@ -222,7 +222,7 @@ class LALGBRegressor(_LALGBBaseModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.weighter = LGBMRegressorWeight()
+        self.weighter = GBMRegressorWeight()
 
     @_LALGBBaseModel.lal_logger.log_error
     @_LALGBBaseModel.assertor.assert_arguments

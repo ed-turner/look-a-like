@@ -17,9 +17,11 @@ class _LGBMWeightsBase:
 
     model = None
 
-    def __init__(self, feature_col, label_col):
+    def __init__(self, feature_col, label_col, num_folds, parallelism):
         self.feature_col = feature_col
         self.label_col = label_col
+        self.num_folds = num_folds
+        self.num_cores = parallelism
 
     def get_space_grid(self):
         model = self.model
@@ -28,10 +30,10 @@ class _LGBMWeightsBase:
             raise NotImplementedError("The model parameter is not set.")
 
         return ParamGridBuilder() \
-            .addGrid(model.stepSize, (10.0 ** np.arange(-10.0, 1.0, 2.0)).tolist()) \
-            .addGrid(model.subsamplingRate, (np.arange(2.0, 11.0, 2.0) / 10.0).tolist()) \
-            .addGrid(model.maxDepth, [1, 3, 5, 7, 9, 11]) \
-            .addGrid(model.maxIter, [100, 500, 1000, 5000, 10000])\
+            .addGrid(model.stepSize, [float(val) for val in (10.0 ** np.arange(-10.0, 1.0, 4.0)).tolist()]) \
+            .addGrid(model.subsamplingRate, [float(val) for val in (np.arange(2.0, 11.0, 4.0) / 10.0).tolist()]) \
+            .addGrid(model.maxDepth, [1, 5, 9, 11]) \
+            .addGrid(model.maxIter, [100, 1000, 10000])\
             .build()
 
     @assertor.assert_arguments
@@ -51,10 +53,13 @@ class _LGBMWeightsBase:
 
         model = self.model
 
+        num_folds = self.num_folds
+        n_cores = self.num_cores
+
         crossval = CrossValidator(estimator=model,
                                   estimatorParamMaps=space_grid,
                                   evaluator=evaluator,
-                                  numFolds=5)
+                                  numFolds=num_folds, parallelism=n_cores)
 
         cvModel = crossval.fit(sdf)
 

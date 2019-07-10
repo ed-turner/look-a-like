@@ -7,10 +7,10 @@ from skopt import gp_minimize
 from skopt.space import Real, Integer
 from skopt.utils import use_named_args
 
-from lightgbm import LGBMClassifier, LGBMRegressor
+from xgboost import XGBClassifier, XGBRegressor
 
 
-class _LGBMWeightsBase(metaclass=ABCMeta):
+class _GBMWeightsBase(metaclass=ABCMeta):
     """
     This is our base class to help generate our importance weights for our features by using the feature_importance
     from the gradient boosting method.
@@ -38,7 +38,7 @@ class _LGBMWeightsBase(metaclass=ABCMeta):
                  Real(0.1, 1.0, name="colsample_bytree"),
                  Real(10 ** -4.0, 10 ** 4.0, "log-uniform", name="reg_alpha"),
                  Real(10 ** -4.0, 10 ** 4.0, "log-uniform", name="reg_lambda"),
-                 Integer(2, 100, name='min_child_samples')]
+                 Integer(2, 100, name='min_child_weight')]
         return space
 
     @abstractmethod
@@ -122,7 +122,7 @@ class _LGBMWeightsBase(metaclass=ABCMeta):
         return self
 
 
-class LGBMClassifierWeight(_LGBMWeightsBase):
+class GBMClassifierWeight(_GBMWeightsBase):
     """
     This is for our classification-task
     """
@@ -130,10 +130,10 @@ class LGBMClassifierWeight(_LGBMWeightsBase):
         super().__init__("neg_log_loss")
 
     def _get_base_model(self):
-        return LGBMClassifier()
+        return XGBClassifier()
 
 
-class LGBMRegressorWeight(_LGBMWeightsBase):
+class GBMRegressorWeight(_GBMWeightsBase):
     """
     This is for our regression-task.
     """
@@ -141,5 +141,5 @@ class LGBMRegressorWeight(_LGBMWeightsBase):
         super().__init__("neg_mean_squared_error")
 
     def _get_base_model(self):
-        return LGBMRegressor()
+        return XGBRegressor()
 
