@@ -19,7 +19,7 @@ class _LALModelBase(metaclass=ABCMeta):
     lal_logger = LALLogger(__name__)
     assertor = AssertArgumentSparkDataFrame()
 
-    def __init__(self, k, p, input_cols=None, label_cols=None):
+    def __init__(self, k, p, input_cols=None, label_cols=None, optimize=True):
         """
 
         :param input_cols:
@@ -27,6 +27,8 @@ class _LALModelBase(metaclass=ABCMeta):
         """
 
         if isinstance(p, float):
+            assert 1.0 <= p
+
             if isinstance(k, int):
                 self.matcher = KNNPowerMatcher(k, p)
             else:
@@ -44,6 +46,8 @@ class _LALModelBase(metaclass=ABCMeta):
                 raise ValueError("This type matcher is not supported")
         else:
             raise ValueError("This distance is not supported")
+
+        self.opt = optimize
 
         self.model = None
         self.weighter = None
@@ -104,19 +108,22 @@ class _LALModelBase(metaclass=ABCMeta):
 
 class LALGBSparkRegressor(_LALModelBase):
     """
-
+    This is when our training labels are continuous.
     """
     def __init__(self, **kwargs):
-        _LALModelBase.__init__(**kwargs)
-        self.weighter = GBMWeightRegressor(feature_col=self.input_cols, label_col=self.label_cols)
+        _LALModelBase.__init__(self, **kwargs)
+        self.weighter = GBMWeightRegressor(feature_col=self.input_cols, label_col=self.label_cols, optimize=self.opt)
 
     @_LALModelBase.lal_logger.log_error
     @_LALModelBase.assertor.assert_arguments
     def predict(self, sdf1, sdf2):
         """
+        We predict the possible value our testing dataset will have, based on the continuous variables.
 
-        :param sdf1:
-        :param sdf2:
+        :param sdf1: The training dataset
+        :type sdf1: pyspark.sql.dataframe.DataFrame
+        :param sdf2: The testing dataset
+        :type sdf2: pyspark.sql.dataframe.DataFrame
         :return:
         """
 
@@ -139,8 +146,10 @@ class LALGBSparkRegressor(_LALModelBase):
 
         matches_sdf = self._get_matches(transformed_sdf1, transformed_sdf2)
 
+        exprs = {"{}".format(val): "avg" for val in label_cols}
+
         preds_sdf = matches_sdf.join(sdf1.select(["id"] + label_cols).withColumnRenamed("id", "id1"), "id1")\
-            .groupby("id2").avg(label_cols).withColumnRenamed("id2", "id")
+            .groupby("id2").agg(exprs).withColumnRenamed("id2", "id")
 
         preds_sdf = preds_sdf.withColumnRenamed("avg({})".format(label_cols[0]), label_cols[0])
 
@@ -149,19 +158,22 @@ class LALGBSparkRegressor(_LALModelBase):
 
 class LALGBSparkBinaryClassifier(_LALModelBase):
     """
-
+    This is when our training labels are binary.
     """
     def __init__(self, **kwargs):
-        _LALModelBase.__init__(**kwargs)
-        self.weighter = GBMWeightBinaryClassifier(feature_col=self.input_cols, label_col=self.label_cols)
+        _LALModelBase.__init__(self, **kwargs)
+        self.weighter = GBMWeightBinaryClassifier(feature_col=self.input_cols, label_col=self.label_cols, optimize=self.opt)
 
     @_LALModelBase.lal_logger.log_error
     @_LALModelBase.assertor.assert_arguments
     def predict_proba(self, sdf1, sdf2):
         """
+        This predicts the probability of our test data having any of the available labels in the training dataset
 
-        :param sdf1:
-        :param sdf2:
+        :param sdf1: The training dataset
+        :type sdf1: pyspark.sql.dataframe.DataFrame
+        :param sdf2: The testing dataset
+        :type sdf2: pyspark.sql.dataframe.DataFrame
         :return:
         """
 
@@ -184,8 +196,10 @@ class LALGBSparkBinaryClassifier(_LALModelBase):
 
         matches_sdf = self._get_matches(transformed_sdf1, transformed_sdf2)
 
+        exprs = {"{}".format(val): "avg" for val in label_cols}
+
         preds_sdf = matches_sdf.join(sdf1.select(["id"] + label_cols).withColumnRenamed("id", "id1"), "id1") \
-            .groupby("id2").avg(label_cols).withColumnRenamed("id2", "id")
+            .groupby("id2").agg(exprs).withColumnRenamed("id2", "id")
 
         preds_sdf = preds_sdf.withColumnRenamed("avg({})".format(label_cols[0]), "raw_{}".format(label_cols[0]))
 
@@ -195,9 +209,12 @@ class LALGBSparkBinaryClassifier(_LALModelBase):
     @_LALModelBase.assertor.assert_arguments
     def predict(self, sdf1, sdf2):
         """
+        We choose most probable label our samples in the testing dataset has.
 
-        :param sdf1:
-        :param sdf2:
+        :param sdf1: The training dataset
+        :type sdf1: pyspark.sql.dataframe.DataFrame
+        :param sdf2: The testing dataset
+        :type sdf2: pyspark.sql.dataframe.DataFrame
         :return:
         """
 
@@ -212,20 +229,23 @@ class LALGBSparkBinaryClassifier(_LALModelBase):
 
 class LALGBSparkMultiClassifier(_LALModelBase):
     """
-
+    This is when our training labels are categorical.
     """
     def __init__(self, **kwargs):
-        _LALModelBase.__init__(**kwargs)
-        self.weighter = GBMWeightMultiClassifier(feature_col=self.input_cols, label_col=self.label_cols)
+        _LALModelBase.__init__(self, **kwargs)
+        self.weighter = GBMWeightMultiClassifier(feature_col=self.input_cols, label_col=self.label_cols, optimize=self.opt)
         self.pred_cols = None
 
     @_LALModelBase.lal_logger.log_error
     @_LALModelBase.assertor.assert_arguments
     def predict_proba(self, sdf1, sdf2):
         """
+        This predicts the probability of our test data having any of the available labels in the training dataset
 
-        :param sdf1:
-        :param sdf2:
+        :param sdf1: The training dataset
+        :type sdf1: pyspark.sql.dataframe.DataFrame
+        :param sdf2: The testing dataset
+        :type sdf2: pyspark.sql.dataframe.DataFrame
         :return:
         """
 
@@ -265,7 +285,7 @@ class LALGBSparkMultiClassifier(_LALModelBase):
         # generates the experimental probability of belonging to that class
         exprs = {"{}_{}".format(label_cols[0], val): "avg" for val in unique_vals}
 
-        tmp_preds_sdf = one_hot_encoded_vals_sdf.groupby("id2").avg(exprs).withColumnRenamed("id2", "id")
+        tmp_preds_sdf = one_hot_encoded_vals_sdf.groupby("id2").agg(exprs).withColumnRenamed("id2", "id")
 
         # sums the independent-class probabilities to normalize the probabilities of the multiclass probs
         preds_sdf = reduce(lambda df, key: df.withColumnRenamed("avg({})".format(key), "raw_{}_tmp".format(key)),
@@ -283,9 +303,12 @@ class LALGBSparkMultiClassifier(_LALModelBase):
     @_LALModelBase.assertor.assert_arguments
     def predict(self, sdf1, sdf2):
         """
+        We choose most probable label our samples in the testing dataset has.
 
-        :param sdf1:
-        :param sdf2:
+        :param sdf1: The training dataset
+        :type sdf1: pyspark.sql.dataframe.DataFrame
+        :param sdf2: The testing dataset
+        :type sdf2: pyspark.sql.dataframe.DataFrame
         :return:
         """
 

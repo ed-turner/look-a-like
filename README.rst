@@ -33,8 +33,8 @@ Methodology
 
 As mentioned in the introduction, we derive some values that are based on
 the predictive power of each feature and scale those features by those values. To
-do that, we use the Light Gradient Boosting Method (LGBM) to fit the training dataset. 
-To optimize the LGBM using bayesian hyper parameter optimize on a train/validation
+do that, we use the Gradient Boosting Model (GBM) to fit the training dataset.
+To optimize the GBM using bayesian hyper parameter optimize on a train/validation
 split on the original training dataset.  Once optimized, we fit on the entire 
 training dataset. By doing so, we will generate the feature importance for 
 each feature.  We then scale our feature importance so that they are nonzero 

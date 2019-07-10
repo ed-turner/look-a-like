@@ -413,28 +413,28 @@ unique matches between our samples</p>
 <div class="section" id="module-lal.core.weights">
 <span id="lal-core-weights-module"></span><h2>lal.core.weights module<a class="headerlink" href="#module-lal.core.weights" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="lal.core.weights.LGBMClassifierWeight">
-<em class="property">class </em><code class="sig-prename descclassname">lal.core.weights.</code><code class="sig-name descname">LGBMClassifierWeight</code><a class="headerlink" href="#lal.core.weights.LGBMClassifierWeight" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lal.core.weights._LGBMWeightsBase" title="lal.core.weights._LGBMWeightsBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.weights._LGBMWeightsBase</span></code></a></p>
+<dt id="lal.core.weights.GBMClassifierWeight">
+<em class="property">class </em><code class="sig-prename descclassname">lal.core.weights.</code><code class="sig-name descname">GBMClassifierWeight</code><a class="headerlink" href="#lal.core.weights.GBMClassifierWeight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lal.core.weights._GBMWeightsBase" title="lal.core.weights._GBMWeightsBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.weights._GBMWeightsBase</span></code></a></p>
 <p>This is for our classification-task</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="lal.core.weights.LGBMRegressorWeight">
-<em class="property">class </em><code class="sig-prename descclassname">lal.core.weights.</code><code class="sig-name descname">LGBMRegressorWeight</code><a class="headerlink" href="#lal.core.weights.LGBMRegressorWeight" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lal.core.weights._LGBMWeightsBase" title="lal.core.weights._LGBMWeightsBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.weights._LGBMWeightsBase</span></code></a></p>
+<dt id="lal.core.weights.GBMRegressorWeight">
+<em class="property">class </em><code class="sig-prename descclassname">lal.core.weights.</code><code class="sig-name descname">GBMRegressorWeight</code><a class="headerlink" href="#lal.core.weights.GBMRegressorWeight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lal.core.weights._GBMWeightsBase" title="lal.core.weights._GBMWeightsBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.weights._GBMWeightsBase</span></code></a></p>
 <p>This is for our regression-task.</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="lal.core.weights._LGBMWeightsBase">
-<em class="property">class </em><code class="sig-prename descclassname">lal.core.weights.</code><code class="sig-name descname">_LGBMWeightsBase</code><span class="sig-paren">(</span><em class="sig-param">metric_name</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.weights._LGBMWeightsBase" title="Permalink to this definition">¶</a></dt>
+<dt id="lal.core.weights._GBMWeightsBase">
+<em class="property">class </em><code class="sig-prename descclassname">lal.core.weights.</code><code class="sig-name descname">_GBMWeightsBase</code><span class="sig-paren">(</span><em class="sig-param">metric_name</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.weights._GBMWeightsBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This is our base class to help generate our importance weights for our features by using the feature_importance
 from the gradient boosting method.</p>
 <dl class="method">
-<dt id="lal.core.weights._LGBMWeightsBase.get_feature_importances">
-<code class="sig-name descname">get_feature_importances</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">labels</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.weights._LGBMWeightsBase.get_feature_importances" title="Permalink to this definition">¶</a></dt>
+<dt id="lal.core.weights._GBMWeightsBase.get_feature_importances">
+<code class="sig-name descname">get_feature_importances</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">labels</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.weights._GBMWeightsBase.get_feature_importances" title="Permalink to this definition">¶</a></dt>
 <dd><p>After optimizing the model, we fit on the whole dataset, parse the feature_importance attribute and scale it
 to sum to one.</p>
 <dl class="field-list simple">
