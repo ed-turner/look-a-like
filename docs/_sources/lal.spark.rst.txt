@@ -1,0 +1,42 @@
+lal.spark package
+=================
+
+.. meta::
+   :description: This is the Look-A-Like Model with custom distances in spark
+   :keywords: apache-spark, nearest neighbors, knn, mahalanobis, gradient boosting, look-a-like, lookalike, look a like
+
+Submodules
+----------
+
+lal.spark.model module
+----------------------
+
+.. automodule:: lal.spark.model
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lal.spark.nn module
+-------------------
+
+.. automodule:: lal.spark.nn
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lal.spark.weights module
+------------------------
+
+.. automodule:: lal.spark.weights
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: lal.spark
+    :members:
+    :undoc-members:
+    :show-inheritance:
