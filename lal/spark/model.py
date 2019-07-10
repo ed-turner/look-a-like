@@ -3,11 +3,13 @@ from abc import ABCMeta, abstractmethod
 from functools import reduce
 
 # pyspark package
+import pyspark.sql.functions as F
 from pyspark.ml.feature import VectorAssembler, ElementwiseProduct, StandardScaler
 from pyspark.ml.pipeline import Pipeline
 
 # in-house packages
 from .utils.asserts import AssertArgumentSparkDataFrame
+from .weights import GBMWeightRegressor, GBMWeightBinaryClassifier, GBMWeightMultiClassifier
 from .nn import KNNPowerMatcher, KNNCosineMatcher, KNNMahalanobisMatcher
 from lal.utils.logger import LALLogger
 
@@ -101,6 +103,12 @@ class _LALModelBase(metaclass=ABCMeta):
 
 
 class LALGBSparkRegressor(_LALModelBase):
+    """
+
+    """
+    def __init__(self, **kwargs):
+        _LALModelBase.__init__(**kwargs)
+        self.weighter = GBMWeightRegressor(feature_col=self.input_cols, label_col=self.label_cols)
 
     @_LALModelBase.lal_logger.log_error
     @_LALModelBase.assertor.assert_arguments
@@ -117,6 +125,8 @@ class LALGBSparkRegressor(_LALModelBase):
 
         if isinstance(label_cols, str):
             label_cols = [label_cols]
+        else:
+            raise ValueError("At the moment, we only allow single output prediction.")
 
         if model is None:
             raise NotImplementedError("The model was not fitted yet!")
@@ -132,7 +142,163 @@ class LALGBSparkRegressor(_LALModelBase):
         preds_sdf = matches_sdf.join(sdf1.select(["id"] + label_cols).withColumnRenamed("id", "id1"), "id1")\
             .groupby("id2").avg(label_cols).withColumnRenamed("id2", "id")
 
-        for col in label_cols:
-            preds_sdf = preds_sdf.withColumnRenamed("avg({})".format(col), col)
+        preds_sdf = preds_sdf.withColumnRenamed("avg({})".format(label_cols[0]), label_cols[0])
 
         return preds_sdf
+
+
+class LALGBSparkBinaryClassifier(_LALModelBase):
+    """
+
+    """
+    def __init__(self, **kwargs):
+        _LALModelBase.__init__(**kwargs)
+        self.weighter = GBMWeightBinaryClassifier(feature_col=self.input_cols, label_col=self.label_cols)
+
+    @_LALModelBase.lal_logger.log_error
+    @_LALModelBase.assertor.assert_arguments
+    def predict_proba(self, sdf1, sdf2):
+        """
+
+        :param sdf1:
+        :param sdf2:
+        :return:
+        """
+
+        model = self.model
+        label_cols = self.label_cols
+
+        if isinstance(label_cols, str):
+            label_cols = [label_cols]
+        else:
+            raise ValueError("At the moment, we only allow single output prediction.")
+
+        if model is None:
+            raise NotImplementedError("The model was not fitted yet!")
+
+        transformed_sdf1 = model.transform(sdf1).select(["id", "scaled_vec"]).withColumnRenamed("id", "id1") \
+            .withColumnRenamed("scaled_vec", "v1")
+
+        transformed_sdf2 = model.transform(sdf2).select(["id", "scaled_vec"]).withColumnRenamed("id", "id2") \
+            .withColumnRenamed("scaled_vec", "v2")
+
+        matches_sdf = self._get_matches(transformed_sdf1, transformed_sdf2)
+
+        preds_sdf = matches_sdf.join(sdf1.select(["id"] + label_cols).withColumnRenamed("id", "id1"), "id1") \
+            .groupby("id2").avg(label_cols).withColumnRenamed("id2", "id")
+
+        preds_sdf = preds_sdf.withColumnRenamed("avg({})".format(label_cols[0]), "raw_{}".format(label_cols[0]))
+
+        return preds_sdf
+
+    @_LALModelBase.lal_logger.log_error
+    @_LALModelBase.assertor.assert_arguments
+    def predict(self, sdf1, sdf2):
+        """
+
+        :param sdf1:
+        :param sdf2:
+        :return:
+        """
+
+        label_col = self.label_cols
+
+        preds_sdf = self.predict_proba(sdf1, sdf2)
+
+        tmp_sdf = preds_sdf.withColumn(label_col, F.when(F.col("raw_{}".format(label_col)) < 0.5, 0).otherwise(1))
+
+        return tmp_sdf
+
+
+class LALGBSparkMultiClassifier(_LALModelBase):
+    """
+
+    """
+    def __init__(self, **kwargs):
+        _LALModelBase.__init__(**kwargs)
+        self.weighter = GBMWeightMultiClassifier(feature_col=self.input_cols, label_col=self.label_cols)
+        self.pred_cols = None
+
+    @_LALModelBase.lal_logger.log_error
+    @_LALModelBase.assertor.assert_arguments
+    def predict_proba(self, sdf1, sdf2):
+        """
+
+        :param sdf1:
+        :param sdf2:
+        :return:
+        """
+
+        model = self.model
+        label_cols = self.label_cols
+
+        if isinstance(label_cols, str):
+            label_cols = [label_cols]
+        else:
+            raise ValueError("At the moment, we only allow single output prediction.")
+
+        if model is None:
+            raise NotImplementedError("The model was not fitted yet!")
+
+        transformed_sdf1 = model.transform(sdf1).select(["id", "scaled_vec"]).withColumnRenamed("id", "id1") \
+            .withColumnRenamed("scaled_vec", "v1")
+
+        transformed_sdf2 = model.transform(sdf2).select(["id", "scaled_vec"]).withColumnRenamed("id", "id2") \
+            .withColumnRenamed("scaled_vec", "v2")
+
+        # gets the matches
+        matches_sdf = self._get_matches(transformed_sdf1, transformed_sdf2)
+
+        # gets the class label per match
+        matched_labels_sdf = matches_sdf.join(sdf1.select(["id"] + label_cols).withColumnRenamed("id", "id1"), "id1")
+
+        # gets the unique values
+        unique_vals = sdf1.agg(F.countDistinct(F.col(label_cols[0]))).collect()
+
+        # one-hot-encodes our class labels
+        one_hot_encoded_vals_sdf = reduce(lambda df, val:
+                                          df.withColumn("{}_{}".format(label_cols[0],
+                                                                       F.when(F.col(label_cols[0]) == val,
+                                                                              1).otherwise(0))),
+                                          unique_vals, matched_labels_sdf)
+
+        # generates the experimental probability of belonging to that class
+        exprs = {"{}_{}".format(label_cols[0], val): "avg" for val in unique_vals}
+
+        tmp_preds_sdf = one_hot_encoded_vals_sdf.groupby("id2").avg(exprs).withColumnRenamed("id2", "id")
+
+        # sums the independent-class probabilities to normalize the probabilities of the multiclass probs
+        preds_sdf = reduce(lambda df, key: df.withColumnRenamed("avg({})".format(key), "raw_{}_tmp".format(key)),
+                           list(exprs.keys()), tmp_preds_sdf).withColumn("one_norm", F.sum(F.col(key) for key in exprs.keys()))
+
+        res_sdf = reduce(lambda df, key: df.withColumn("raw_{}".format(key),
+                                                       F.col("raw_{}_tmp".format(key)) / F.col("one_norm")),
+                         list(exprs.keys()), preds_sdf).drop("one_norm")
+
+        self.pred_cols = list(exprs.keys())
+
+        return res_sdf
+
+    @_LALModelBase.lal_logger.log_error
+    @_LALModelBase.assertor.assert_arguments
+    def predict(self, sdf1, sdf2):
+        """
+
+        :param sdf1:
+        :param sdf2:
+        :return:
+        """
+
+        label_col = self.label_cols
+
+        preds_cols = self.pred_cols
+
+        preds_sdf = self.predict_proba(sdf1, sdf2)
+
+        cond = "F.when" + ".when".join(
+            ["(F.col('" + c + "') == F.col('max_value'), F.lit('" + c + "'))" for c in preds_cols])
+
+        tmp_sdf = preds_sdf.withColumn("max_value", F.greatest(*(F.col(c) for c in preds_cols)))\
+            .withColumn(label_col, eval(cond))
+
+        return tmp_sdf
