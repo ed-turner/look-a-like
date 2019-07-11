@@ -57,15 +57,25 @@ class _LALModelBase(metaclass=ABCMeta):
 
     @lal_logger.log_error
     @assertor.assert_arguments
-    def _get_matches(self, sdf1, sdf2):
+    def get_matches(self, sdf1, sdf2):
         """
 
         :param sdf1:
         :param sdf2:
         :return:
         """
+        model = self.model
 
-        matches_sdf = self.matcher.match(sdf1, sdf2)
+        if model is None:
+            raise NotImplementedError("The model was not fitted yet!")
+
+        transformed_sdf1 = model.transform(sdf1).select(["id", "scaled_vec"]).withColumnRenamed("id", "id1") \
+            .withColumnRenamed("scaled_vec", "v1")
+
+        transformed_sdf2 = model.transform(sdf2).select(["id", "scaled_vec"]).withColumnRenamed("id", "id2") \
+            .withColumnRenamed("scaled_vec", "v2")
+
+        matches_sdf = self.matcher.match(transformed_sdf1, transformed_sdf2)
 
         return matches_sdf
 
@@ -127,7 +137,6 @@ class LALGBSparkRegressor(_LALModelBase):
         :return:
         """
 
-        model = self.model
         label_cols = self.label_cols
 
         if isinstance(label_cols, str):
@@ -135,16 +144,7 @@ class LALGBSparkRegressor(_LALModelBase):
         else:
             raise ValueError("At the moment, we only allow single output prediction.")
 
-        if model is None:
-            raise NotImplementedError("The model was not fitted yet!")
-
-        transformed_sdf1 = model.transform(sdf1).select(["id", "scaled_vec"]).withColumnRenamed("id", "id1")\
-            .withColumnRenamed("scaled_vec", "v1")
-
-        transformed_sdf2 = model.transform(sdf2).select(["id", "scaled_vec"]).withColumnRenamed("id", "id2") \
-            .withColumnRenamed("scaled_vec", "v2")
-
-        matches_sdf = self._get_matches(transformed_sdf1, transformed_sdf2)
+        matches_sdf = self.get_matches(sdf1, sdf2)
 
         exprs = {"{}".format(val): "avg" for val in label_cols}
 
@@ -177,7 +177,6 @@ class LALGBSparkBinaryClassifier(_LALModelBase):
         :return:
         """
 
-        model = self.model
         label_cols = self.label_cols
 
         if isinstance(label_cols, str):
@@ -185,16 +184,7 @@ class LALGBSparkBinaryClassifier(_LALModelBase):
         else:
             raise ValueError("At the moment, we only allow single output prediction.")
 
-        if model is None:
-            raise NotImplementedError("The model was not fitted yet!")
-
-        transformed_sdf1 = model.transform(sdf1).select(["id", "scaled_vec"]).withColumnRenamed("id", "id1") \
-            .withColumnRenamed("scaled_vec", "v1")
-
-        transformed_sdf2 = model.transform(sdf2).select(["id", "scaled_vec"]).withColumnRenamed("id", "id2") \
-            .withColumnRenamed("scaled_vec", "v2")
-
-        matches_sdf = self._get_matches(transformed_sdf1, transformed_sdf2)
+        matches_sdf = self.get_matches(sdf1, sdf2)
 
         exprs = {"{}".format(val): "avg" for val in label_cols}
 
@@ -249,7 +239,6 @@ class LALGBSparkMultiClassifier(_LALModelBase):
         :return:
         """
 
-        model = self.model
         label_cols = self.label_cols
 
         if isinstance(label_cols, str):
@@ -257,17 +246,8 @@ class LALGBSparkMultiClassifier(_LALModelBase):
         else:
             raise ValueError("At the moment, we only allow single output prediction.")
 
-        if model is None:
-            raise NotImplementedError("The model was not fitted yet!")
-
-        transformed_sdf1 = model.transform(sdf1).select(["id", "scaled_vec"]).withColumnRenamed("id", "id1") \
-            .withColumnRenamed("scaled_vec", "v1")
-
-        transformed_sdf2 = model.transform(sdf2).select(["id", "scaled_vec"]).withColumnRenamed("id", "id2") \
-            .withColumnRenamed("scaled_vec", "v2")
-
         # gets the matches
-        matches_sdf = self._get_matches(transformed_sdf1, transformed_sdf2)
+        matches_sdf = self.get_matches(sdf1, sdf2)
 
         # gets the class label per match
         matched_labels_sdf = matches_sdf.join(sdf1.select(["id"] + label_cols).withColumnRenamed("id", "id1"), "id1")

@@ -10,7 +10,7 @@ from lal.utils.logger import LALLogger, CustomLogHandler
 
 class TestLALGBSparkRegressor(PySparkTestFramework):
 
-    logger = LALLogger("test_lal_regressor", CustomLogHandler("lal_model_regressor.log"))
+    logger = LALLogger("test_lal_regressor")
 
     @logger.log_error
     def test_predictions_1nn(self):
@@ -45,7 +45,7 @@ class TestLALGBSparkRegressor(PySparkTestFramework):
 
 class TestLALGBSparkBinaryClassifier(PySparkTestFramework):
 
-    logger = LALLogger("test_lal_classifier", CustomLogHandler("lal_model_classifier.log"))
+    logger = LALLogger("test_lal_classifier")
 
     @logger.log_error
     def test_predictions_1nn(self):
