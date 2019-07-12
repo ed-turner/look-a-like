@@ -23,7 +23,7 @@ class TestKNNSparkPowerMatcher(PySparkTestFramework):
 
         self.logger.info("We are testing that the data is mapped to itself.")
 
-        p = np.random.random()*100
+        p = max(np.random.random()*100, 1.0)
 
         spark = self.spark
 
