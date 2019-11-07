@@ -344,7 +344,16 @@ class _EMDMatcher(_DistanceBase, ABC):
     Please consult this reference: https://en.wikipedia.org/wiki/Earth_mover%27s_distance
     """
 
-    def match(self, mat1, mat2, wt1, wt2):
+    def __init__(self, training_weights, testing_weights, max_pct_diff=0.01):
+        """
+
+        :param max_pct_diff:
+        """
+        self.wt1 = testing_weights
+        self.wt2 = training_weights
+        self.pct_diff = max_pct_diff
+
+    def match(self, mat1, mat2):
         """
         Given the training matrix and the testing matrix, along with the sample weights for each of the samples,
         which is suppose to measure their relevance to the universe, we match the samples together such that
@@ -354,14 +363,13 @@ class _EMDMatcher(_DistanceBase, ABC):
         :type mat1: numpy.array
         :param mat2: The testing dataset
         :type mat2: numpy.array
-        :param wt1: The training sample weights
-        :type wt1: numpy.array
-        :param wt2: The testing sample weights
-        :type wt2: numpy.array
         :return:
         """
 
         cost = self.calc_dist(mat1, mat2)
+        pct_diff = self.pct_diff
+        wt1 = self.wt1
+        wt2 = self.wt2
 
         nr = cost.shape[0]
         nd = cost.shape[1]
@@ -390,7 +398,7 @@ class _EMDMatcher(_DistanceBase, ABC):
             solver.Add(0. <= w_rel[row])
 
             # we assert the percent difference is less than 10%
-            solver.Add(w_rel[row] <= 0.01)
+            solver.Add(w_rel[row] <= pct_diff)
 
         for col in range(nd):
             # we assert that each training sample is matched at most once

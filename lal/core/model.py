@@ -10,7 +10,8 @@ from sklearn.pipeline import Pipeline
 from lal.utils.logger import LALLogger
 from lal.utils.asserts import AssertArgumentNDArray
 
-from .nn import KNNPowerMatcher, KNNCosineMatcher, NNLinearSumCosineMatcher, NNLinearSumPowerMatcher, KNNMahalanobisMatcher, NNLinearSumMahalanobisMatcher
+from . import nn
+
 from .weights import GBMClassifierWeight, GBMRegressorWeight
 
 
@@ -50,29 +51,42 @@ class _LALGBBaseModel(metaclass=ABCMeta):
                          "the console."
     assertor.__doc__ = "This is the Look-A-Like class level argument assertion"
 
-    def __init__(self, k, p):
+    def __init__(self, k, p, **kwargs):
 
         if isinstance(p, float):
             if isinstance(k, int):
-                self.matcher = KNNPowerMatcher(k, p)
+                self.matcher = nn.KNNPowerMatcher(k, p)
             elif k == "linear_sum":
-                self.matcher = NNLinearSumPowerMatcher(p)
+                self.matcher = nn.NNLinearSumPowerMatcher(p)
+            elif k == 'emd':
+                if kwargs is None:
+                    raise RuntimeError("We are missing the training and testing sample weights")
+                self.matcher = nn.EMDPowerMatcher(**kwargs)
+
             else:
                 raise ValueError("This type matcher is not supported")
 
         elif p == 'cosine':
             if isinstance(k, int):
-                self.matcher = KNNCosineMatcher(k)
+                self.matcher = nn.KNNCosineMatcher(k)
             elif k == "linear_sum":
-                self.matcher = NNLinearSumCosineMatcher()
+                self.matcher = nn.NNLinearSumCosineMatcher()
+            elif k == 'emd':
+                if kwargs is None:
+                    raise RuntimeError("We are missing the training and testing sample weights")
+                self.matcher = nn.EMDCosineMatcher(**kwargs)
             else:
                 raise ValueError("This type matcher is not supported")
 
         elif p == 'mahalanbois':
             if isinstance(k, int):
-                self.matcher = KNNMahalanobisMatcher(k)
+                self.matcher = nn.KNNMahalanobisMatcher(k)
             elif k == "linear_sum":
-                self.matcher = NNLinearSumMahalanobisMatcher()
+                self.matcher = nn.NNLinearSumMahalanobisMatcher()
+            elif k == 'emd':
+                if kwargs is None:
+                    raise RuntimeError("We are missing the training and testing sample weights")
+                self.matcher = nn.EMDMahalanobisMatcher(**kwargs)
             else:
                 raise ValueError("This type matcher is not supported")
         else:
