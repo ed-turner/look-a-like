@@ -1,8 +1,10 @@
 from abc import ABCMeta, abstractmethod, ABC
 
 import numpy as np
-from lap import lapjv
 
+from ortools.linear_solver import pywraplp
+from scipy.sparse import csr_matrix
+from lap import lapjv
 from numba import jit
 
 
@@ -331,5 +333,114 @@ class NNLinearSumMahalanobisMatcher(_MahalanobisDistance, _NNLinearSumBase):
 class NNLinearSumCosineMatcher(_CosineDistance, _NNLinearSumBase):
     """
     This is the Exhaustive-Hungarian Matching algorithm with the cosine distance measure.
+    """
+    pass
+
+
+class _EMDMatcher(_DistanceBase, ABC):
+    """
+    This idea of matching is based on the Earth Mover Distance.
+
+    Please consult this reference: https://en.wikipedia.org/wiki/Earth_mover%27s_distance
+    """
+
+    def match(self, mat1, mat2, wt1, wt2):
+        """
+        Given the training matrix and the testing matrix, along with the sample weights for each of the samples,
+        which is suppose to measure their relevance to the universe, we match the samples together such that
+        it minimizes the total distance of the matched samples
+
+        :param mat1: The training dataset
+        :type mat1: numpy.array
+        :param mat2: The testing dataset
+        :type mat2: numpy.array
+        :param wt1: The training sample weights
+        :type wt1: numpy.array
+        :param wt2: The testing sample weights
+        :type wt2: numpy.array
+        :return:
+        """
+
+        cost = self.calc_dist(mat1, mat2)
+
+        nr = cost.shape[0]
+        nd = cost.shape[1]
+
+        adj = wt1.sum() / wt2.sum()
+        new_wt2 = np.round(wt2 * adj).astype(np.int64)
+
+        solver = pywraplp.Solver('emd_program', pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
+
+        graph_vars = {}
+
+        for row in range(nr):
+            for col in range(nd):
+                graph_vars[row, col] = solver.BoolVar("row_{}_col_{}".format(row, col))
+
+        w_rel = {}
+
+        for row in range(nr):
+            # we assert that each test sample is given one training sample
+            solver.Add(1 <= solver.Sum([graph_vars[row, col] for col in range(nd)]))
+
+            # this is the percent difference between the sum of test and the sum of the train
+            w_rel[row] = 1. - (solver.Sum([graph_vars[row, col] * new_wt2[col] for col in range(nd)]) / wt1[row])
+
+            # we assert the percent difference is more than zero
+            solver.Add(0. <= w_rel[row])
+
+            # we assert the percent difference is less than 10%
+            solver.Add(w_rel[row] <= 0.01)
+
+        for col in range(nd):
+            # we assert that each training sample is matched at most once
+            solver.Add(solver.Sum([graph_vars[row, col] for row in range(nr)]) <= 1)
+
+        obj = solver.Sum([cost[row][col] * graph_vars[row, col] for row in range(nr) for col in range(nd)])
+        penalty = solver.Sum([w_rel[row] for row in range(nr)])
+
+        solver.Minimize(obj + penalty)
+
+        result_status = solver.Solve()
+
+        assert result_status == pywraplp.Solver.OPTIMAL
+
+        idx_i = []
+        idx_j = []
+
+        for row in range(nr):
+            for col in range(nd):
+                if graph_vars[row, col].solution_value() == 1:
+                    idx_i.append(row)
+                    idx_j.append(col)
+
+        num_vals = len(idx_i)
+
+        _sol = csr_matrix(([1] * num_vals, (idx_i, idx_j)), shape=(nr, nd))
+
+        assert (_sol.sum(axis=0) <= 1).all()
+        assert (1 <= _sol.sum(axis=1)).all()
+
+        return _sol
+
+
+class EMDPowerMatcher(_PowerDistance, _EMDMatcher):
+    """
+    This is the Earth Mover Distance Matching algorithm with the p-norm distance measure.
+    """
+    def __init__(self, p):
+        _PowerDistance.__init__(self, p)
+
+
+class EMDMahalanobisMatcher(_MahalanobisDistance, _EMDMatcher):
+    """
+    This is the Earth Mover Distance Matching algorithm with the mahalanobis distance measure.
+    """
+    pass
+
+
+class EMDCosineMatcher(_CosineDistance, _EMDMatcher):
+    """
+    This is the Earth Mover Distance Matching algorithm with the cosine distance measure.
     """
     pass
