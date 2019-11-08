@@ -353,24 +353,16 @@ class _EMDMatcher(_DistanceBase, ABC):
         self.wt2 = training_weights
         self.pct_diff = max_pct_diff
 
-    def match(self, mat1, mat2):
+    @staticmethod
+    def _batch_match(cost, wt1, wt2, eps):
         """
-        Given the training matrix and the testing matrix, along with the sample weights for each of the samples,
-        which is suppose to measure their relevance to the universe, we match the samples together such that
-        it minimizes the total distance of the matched samples
 
-        :param mat1: The training dataset
-        :type mat1: numpy.array
-        :param mat2: The testing dataset
-        :type mat2: numpy.array
+        :param cost:
+        :param wt1:
+        :param wt2:
+        :param eps:
         :return:
         """
-
-        cost = self.calc_dist(mat1, mat2)
-        pct_diff = self.pct_diff
-        wt1 = self.wt1
-        wt2 = self.wt2
-
         nr = cost.shape[0]
         nd = cost.shape[1]
 
@@ -398,7 +390,7 @@ class _EMDMatcher(_DistanceBase, ABC):
             solver.Add(0. <= w_rel[row])
 
             # we assert the percent difference is less than 10%
-            solver.Add(w_rel[row] <= pct_diff)
+            solver.Add(w_rel[row] <= eps)
 
         for col in range(nd):
             # we assert that each training sample is matched at most once
@@ -422,14 +414,46 @@ class _EMDMatcher(_DistanceBase, ABC):
                     idx_i.append(row)
                     idx_j.append(col)
 
-        num_vals = len(idx_i)
+        return np.column_stack((idx_i, idx_j)).astype(np.int64)
 
-        _sol = csr_matrix(([1] * num_vals, (idx_i, idx_j)), shape=(nr, nd))
+    def match(self, mat1, mat2):
+        """
+        Given the training matrix and the testing matrix, along with the sample weights for each of the samples,
+        which is suppose to measure their relevance to the universe, we match the samples together such that
+        it minimizes the total distance of the matched samples
 
-        assert (_sol.sum(axis=0) <= 1).all()
-        assert (1 <= _sol.sum(axis=1)).all()
+        :param mat1: The training dataset
+        :type mat1: numpy.array
+        :param mat2: The testing dataset
+        :type mat2: numpy.array
+        :return:
+        """
 
-        return _sol
+        cost = self.calc_dist(mat1, mat2)
+        pct_diff = self.pct_diff
+        wt1 = self.wt1
+        wt2 = self.wt2
+
+        col_loops = np.arange(0, cost.shape[1]).astype(np.int64)
+
+        sol_lst = []
+
+        for i in range(0, cost.shape[0], 10):
+            row_loop = np.arange(i, i + 10).astype(np.int64)
+            batch_cost = cost[row_loop, :][:, col_loops]
+            batch_wt1 = wt1[row_loop]
+            batch_wt2 = wt2[col_loops]
+
+            _sol = self._batch_match(batch_cost, batch_wt1, batch_wt2, pct_diff)
+
+            _sol[:, 0] = row_loop[_sol[:, 0]]
+            _sol[:, 1] = col_loops[_sol[:, 1]]
+
+            sol_lst.append(_sol)
+
+            col_loops = np.array([x for x in col_loops if not (x in _sol[:, 1])]).astype(np.int64)
+
+        return np.vstack(sol_lst).astype(np.int64)
 
 
 class EMDPowerMatcher(_PowerDistance, _EMDMatcher):
