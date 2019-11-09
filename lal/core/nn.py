@@ -2,6 +2,8 @@ from abc import ABCMeta, abstractmethod, ABC
 
 import numpy as np
 
+import itertools
+
 from ortools.linear_solver import pywraplp
 from scipy.sparse import csr_matrix
 from lap import lapjv
@@ -367,15 +369,16 @@ class _EMDMatcher(_DistanceBase, ABC):
         nd = cost.shape[1]
 
         adj = wt1.sum() / wt2.sum()
-        new_wt2 = np.round(wt2 * adj).astype(np.int64)
+        new_wt2 = wt2 * adj
 
-        solver = pywraplp.Solver('emd_program', pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
+        solver = pywraplp.Solver('emd_program', pywraplp.Solver.GLOP_LINEAR_PROGRAMMING)
 
-        graph_vars = {}
+        def create_var(i, j):
+            return solver.Var(0., 1. + 1e-10, name="row_{}_col_{}".format(i, j), integer=False)
 
-        for row in range(nr):
-            for col in range(nd):
-                graph_vars[row, col] = solver.BoolVar("row_{}_col_{}".format(row, col))
+        indices = itertools.product(range(nr), range(nd))
+
+        graph_vars = {x: create_var(*x) for x in indices}
 
         w_rel = {}
 
@@ -389,7 +392,7 @@ class _EMDMatcher(_DistanceBase, ABC):
             # we assert the percent difference is more than zero
             solver.Add(0. <= w_rel[row])
 
-            # we assert the percent difference is less than 10%
+            # we assert the percent difference is less than 1%
             solver.Add(w_rel[row] <= eps)
 
         for col in range(nd):
@@ -405,16 +408,9 @@ class _EMDMatcher(_DistanceBase, ABC):
 
         assert result_status == pywraplp.Solver.OPTIMAL
 
-        idx_i = []
-        idx_j = []
+        _vals = [list(x) for x in indices if graph_vars[x].solution_value() == 1]
 
-        for row in range(nr):
-            for col in range(nd):
-                if graph_vars[row, col].solution_value() == 1:
-                    idx_i.append(row)
-                    idx_j.append(col)
-
-        return np.column_stack((idx_i, idx_j)).astype(np.int64)
+        return np.array(_vals).astype(np.int64)
 
     def match(self, mat1, mat2):
         """
@@ -434,26 +430,9 @@ class _EMDMatcher(_DistanceBase, ABC):
         wt1 = self.wt1
         wt2 = self.wt2
 
-        col_loops = np.arange(0, cost.shape[1]).astype(np.int64)
+        sol = self._batch_match(cost, wt1, wt2, pct_diff)
 
-        sol_lst = []
-
-        for i in range(0, cost.shape[0], 10):
-            row_loop = np.arange(i, i + 10).astype(np.int64)
-            batch_cost = cost[row_loop, :][:, col_loops]
-            batch_wt1 = wt1[row_loop]
-            batch_wt2 = wt2[col_loops]
-
-            _sol = self._batch_match(batch_cost, batch_wt1, batch_wt2, pct_diff)
-
-            _sol[:, 0] = row_loop[_sol[:, 0]]
-            _sol[:, 1] = col_loops[_sol[:, 1]]
-
-            sol_lst.append(_sol)
-
-            col_loops = np.array([x for x in col_loops if not (x in _sol[:, 1])]).astype(np.int64)
-
-        return np.vstack(sol_lst).astype(np.int64)
+        return sol
 
 
 class EMDPowerMatcher(_PowerDistance, _EMDMatcher):
