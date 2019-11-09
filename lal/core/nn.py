@@ -346,14 +346,14 @@ class _EMDMatcher(_DistanceBase, ABC):
     Please consult this reference: https://en.wikipedia.org/wiki/Earth_mover%27s_distance
     """
 
-    def __init__(self, training_weights, testing_weights, max_pct_diff=0.01):
+    def __init__(self, training_weights, testing_weights, thrsh=1e-14):
         """
 
-        :param max_pct_diff:
+        :param thrsh:
         """
         self.wt1 = testing_weights
         self.wt2 = training_weights
-        self.pct_diff = max_pct_diff
+        self.thrsh = thrsh
 
     @staticmethod
     def _batch_match(cost, wt1, wt2, eps):
@@ -362,7 +362,7 @@ class _EMDMatcher(_DistanceBase, ABC):
         :param cost:
         :param wt1:
         :param wt2:
-        :param eps:
+        :param eps: The tolerance threshold
         :return:
         """
         nr = cost.shape[0]
@@ -374,7 +374,7 @@ class _EMDMatcher(_DistanceBase, ABC):
         solver = pywraplp.Solver('emd_program', pywraplp.Solver.GLOP_LINEAR_PROGRAMMING)
 
         def create_var(i, j):
-            return solver.Var(0., 1. + 1e-10, name="row_{}_col_{}".format(i, j), integer=False)
+            return solver.NumVar(0., 1, name="row_{}_col_{}".format(i, j))
 
         indices = itertools.product(range(nr), range(nd))
 
@@ -390,25 +390,21 @@ class _EMDMatcher(_DistanceBase, ABC):
             w_rel[row] = 1. - (solver.Sum([graph_vars[row, col] * new_wt2[col] for col in range(nd)]) / wt1[row])
 
             # we assert the percent difference is more than zero
-            solver.Add(0. <= w_rel[row])
-
-            # we assert the percent difference is less than 1%
-            solver.Add(w_rel[row] <= eps)
+            solver.Add(0. == w_rel[row])
 
         for col in range(nd):
             # we assert that each training sample is matched at most once
             solver.Add(solver.Sum([graph_vars[row, col] for row in range(nr)]) <= 1)
 
         obj = solver.Sum([cost[row][col] * graph_vars[row, col] for row in range(nr) for col in range(nd)])
-        penalty = solver.Sum([w_rel[row] for row in range(nr)])
 
-        solver.Minimize(obj + penalty)
+        solver.Minimize(obj)
 
         result_status = solver.Solve()
 
         assert result_status == pywraplp.Solver.OPTIMAL
 
-        _vals = [list(x) for x in indices if graph_vars[x].solution_value() == 1]
+        _vals = [list(x) for x in indices if eps < graph_vars[x].solution_value()]
 
         return np.array(_vals).astype(np.int64)
 
@@ -426,11 +422,11 @@ class _EMDMatcher(_DistanceBase, ABC):
         """
 
         cost = self.calc_dist(mat1, mat2)
-        pct_diff = self.pct_diff
+        thrsh = self.thrsh
         wt1 = self.wt1
         wt2 = self.wt2
 
-        sol = self._batch_match(cost, wt1, wt2, pct_diff)
+        sol = self._batch_match(cost, wt1, wt2, thrsh)
 
         return sol
 
