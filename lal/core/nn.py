@@ -383,9 +383,6 @@ class _EMDMatcher(_DistanceBase, ABC):
         w_rel = {}
 
         for row in range(nr):
-            # we assert that each test sample is given one training sample
-            solver.Add(1 <= solver.Sum([graph_vars[row, col] for col in range(nd)]))
-
             # this is the percent difference between the sum of test and the sum of the train
             w_rel[row] = 1. - (solver.Sum([graph_vars[row, col] * new_wt2[col] for col in range(nd)]) / wt1[row])
 
