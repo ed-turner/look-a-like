@@ -1,13 +1,18 @@
+# standard python library
 from abc import ABCMeta, abstractmethod, ABC
+import itertools
+import warnings
 
+# numeric package
 import numpy as np
 
-import itertools
-
-from ortools.linear_solver import pywraplp
-from scipy.sparse import csr_matrix
-from lap import lapjv
+# helps speed up performance
 from numba import jit
+
+# optimization packages
+from ortools.linear_solver import pywraplp
+from lap import lapjv
+
 
 
 class _DistanceBase(metaclass=ABCMeta):
@@ -393,13 +398,16 @@ class _EMDMatcher(_DistanceBase, ABC):
             # we assert that each training sample is matched at most once
             solver.Add(solver.Sum([graph_vars[row, col] for row in range(nr)]) <= 1)
 
-        obj = solver.Sum([cost[row][col] * graph_vars[row, col] for row in range(nr) for col in range(nd)])
+        obj = solver.Sum([cost[x] * graph_vars[x] for x in indices])
 
         solver.Minimize(obj)
 
         result_status = solver.Solve()
 
-        assert result_status == pywraplp.Solver.OPTIMAL
+        if result_status == pywraplp.Solver.OPTIMAL:
+            pass
+        else:
+            warnings.warn("The solver failed to find an optimized... Results may varn")
 
         _vals = [list(x) for x in indices if eps < graph_vars[x].solution_value()]
 
