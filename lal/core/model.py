@@ -61,7 +61,7 @@ class _LALGBBaseModel(metaclass=ABCMeta):
             elif k == 'emd':
                 if kwargs is None:
                     raise RuntimeError("We are missing the training and testing sample weights")
-                self.matcher = nn.EMDPowerMatcher(**kwargs)
+                self.matcher = nn.EMDPowerMatcher(**kwargs, p=p)
 
             else:
                 raise ValueError("This type matcher is not supported")

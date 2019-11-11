@@ -440,19 +440,23 @@ class EMDPowerMatcher(_PowerDistance, _EMDMatcher):
     """
     This is the Earth Mover Distance Matching algorithm with the p-norm distance measure.
     """
-    def __init__(self, p):
+    def __init__(self, p, training_weights, testing_weights, thrsh):
         _PowerDistance.__init__(self, p)
+        _EMDMatcher.__init__(self, training_weights, testing_weights, thrsh)
 
 
 class EMDMahalanobisMatcher(_MahalanobisDistance, _EMDMatcher):
     """
     This is the Earth Mover Distance Matching algorithm with the mahalanobis distance measure.
     """
-    pass
+    def __init__(self, training_weights, testing_weights, thrsh):
+        _EMDMatcher.__init__(self, training_weights, testing_weights, thrsh)
 
 
 class EMDCosineMatcher(_CosineDistance, _EMDMatcher):
     """
     This is the Earth Mover Distance Matching algorithm with the cosine distance measure.
     """
-    pass
+
+    def __init__(self, training_weights, testing_weights, thrsh):
+        _EMDMatcher.__init__(self, training_weights, testing_weights, thrsh)
