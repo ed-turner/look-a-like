@@ -15,6 +15,16 @@ from . import nn
 from .weights import GBMClassifierWeight, GBMRegressorWeight
 
 
+__doc__ = """
+
+This is a combination of the weighting methodology and the matching methodology. 
+
+The feature weights are used to scale the training and testing features, and then used to help the matching algorithm
+which samples are closest to each other based on which one is more important to predict a particular value.
+
+"""
+
+
 class _Scaler(TransformerMixin):
     """
     This class will scale an array with a numpy array based into the __init__

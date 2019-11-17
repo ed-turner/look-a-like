@@ -13,6 +13,14 @@ from numba import jit
 from ortools.linear_solver import pywraplp
 from lap import lapjv
 
+__doc__ = """
+
+This matching methodology and the distance measure calculations exist here.  Please consider the remaining code base
+to learn more about which algorithms are available.
+
+"""
+
+__author__ = ""
 
 
 class _DistanceBase(metaclass=ABCMeta):

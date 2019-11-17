@@ -10,6 +10,14 @@ from skopt.utils import use_named_args
 from xgboost import XGBClassifier, XGBRegressor
 
 
+__doc__ = """
+
+Given the type of regression task, we decide the optimal parameters for the base learner, by default is the Xgboost
+mode, and then use the feature importance to devise feature weights for each feature in the training set.  
+
+"""
+
+
 class _GBMWeightsBase(metaclass=ABCMeta):
     """
     This is our base class to help generate our importance weights for our features by using the feature_importance

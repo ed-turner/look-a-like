@@ -181,6 +181,9 @@
 </div>
 <div class="section" id="module-lal.core.model">
 <span id="lal-core-model-module"></span><h2>lal.core.model module<a class="headerlink" href="#module-lal.core.model" title="Permalink to this headline">¶</a></h2>
+<p>This is a combination of the weighting methodology and the matching methodology.</p>
+<p>The feature weights are used to scale the training and testing features, and then used to help the matching algorithm
+which samples are closest to each other based on which one is more important to predict a particular value.</p>
 <dl class="class">
 <dt id="lal.core.model.LALGBClassifier">
 <em class="property">class </em><code class="sig-prename descclassname">lal.core.model.</code><code class="sig-name descname">LALGBClassifier</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.model.LALGBClassifier" title="Permalink to this definition">¶</a></dt>
@@ -252,6 +255,29 @@
 </div>
 <div class="section" id="module-lal.core.nn">
 <span id="lal-core-nn-module"></span><h2>lal.core.nn module<a class="headerlink" href="#module-lal.core.nn" title="Permalink to this headline">¶</a></h2>
+<p>This matching methodology and the distance measure calculations exist here.  Please consider the remaining code base
+to learn more about which algorithms are available.</p>
+<dl class="class">
+<dt id="lal.core.nn.EMDCosineMatcher">
+<em class="property">class </em><code class="sig-prename descclassname">lal.core.nn.</code><code class="sig-name descname">EMDCosineMatcher</code><span class="sig-paren">(</span><em class="sig-param">training_weights</em>, <em class="sig-param">testing_weights</em>, <em class="sig-param">thrsh</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.nn.EMDCosineMatcher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._CosineDistance</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._EMDMatcher</span></code></p>
+<p>This is the Earth Mover Distance Matching algorithm with the cosine distance measure.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lal.core.nn.EMDMahalanobisMatcher">
+<em class="property">class </em><code class="sig-prename descclassname">lal.core.nn.</code><code class="sig-name descname">EMDMahalanobisMatcher</code><span class="sig-paren">(</span><em class="sig-param">training_weights</em>, <em class="sig-param">testing_weights</em>, <em class="sig-param">thrsh</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.nn.EMDMahalanobisMatcher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._MahalanobisDistance</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._EMDMatcher</span></code></p>
+<p>This is the Earth Mover Distance Matching algorithm with the mahalanobis distance measure.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lal.core.nn.EMDPowerMatcher">
+<em class="property">class </em><code class="sig-prename descclassname">lal.core.nn.</code><code class="sig-name descname">EMDPowerMatcher</code><span class="sig-paren">(</span><em class="sig-param">p</em>, <em class="sig-param">training_weights</em>, <em class="sig-param">testing_weights</em>, <em class="sig-param">thrsh</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.nn.EMDPowerMatcher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._PowerDistance</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.core.nn._EMDMatcher</span></code></p>
+<p>This is the Earth Mover Distance Matching algorithm with the p-norm distance measure.</p>
+</dd></dl>
+
 <dl class="class">
 <dt id="lal.core.nn.KNNCosineMatcher">
 <em class="property">class </em><code class="sig-prename descclassname">lal.core.nn.</code><code class="sig-name descname">KNNCosineMatcher</code><span class="sig-paren">(</span><em class="sig-param">k</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.core.nn.KNNCosineMatcher" title="Permalink to this definition">¶</a></dt>
@@ -297,6 +323,8 @@
 </div>
 <div class="section" id="module-lal.core.weights">
 <span id="lal-core-weights-module"></span><h2>lal.core.weights module<a class="headerlink" href="#module-lal.core.weights" title="Permalink to this headline">¶</a></h2>
+<p>Given the type of regression task, we decide the optimal parameters for the base learner, by default is the Xgboost
+mode, and then use the feature importance to devise feature weights for each feature in the training set.</p>
 <dl class="class">
 <dt id="lal.core.weights.GBMClassifierWeight">
 <em class="property">class </em><code class="sig-prename descclassname">lal.core.weights.</code><code class="sig-name descname">GBMClassifierWeight</code><a class="headerlink" href="#lal.core.weights.GBMClassifierWeight" title="Permalink to this definition">¶</a></dt>
