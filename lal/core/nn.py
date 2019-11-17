@@ -385,14 +385,9 @@ class _EMDMatcher(_DistanceBase, ABC):
 
         graph_vars = {x: create_var(*x) for x in indices}
 
-        w_rel = {}
-
         for row in range(nr):
-            # this is the percent difference between the sum of test and the sum of the train
-            w_rel[row] = 1. - (solver.Sum([graph_vars[row, col] * new_wt2[col] for col in range(nd)]) / wt1[row])
-
             # we assert the percent difference is more than zero
-            solver.Add(0. == w_rel[row])
+            solver.Add(solver.Sum([graph_vars[row, col] * new_wt2[col] for col in range(nd)]) == wt1[row])
 
         for col in range(nd):
             # we assert that each training sample is matched at most once
@@ -407,7 +402,7 @@ class _EMDMatcher(_DistanceBase, ABC):
         if result_status == pywraplp.Solver.OPTIMAL:
             pass
         else:
-            warnings.warn("The solver failed to find an optimized... Results may varn")
+            warnings.warn("The solver failed to find an optimized... Results may vary")
 
         _vals = [list(x) for x in indices if eps < graph_vars[x].solution_value()]
 
@@ -430,6 +425,9 @@ class _EMDMatcher(_DistanceBase, ABC):
         thrsh = self.thrsh
         wt1 = self.wt1
         wt2 = self.wt2
+
+        assert cost.shape[0] == wt2.shape[0]
+        assert cost.shape[1] == wt1.shape[0]
 
         sol = self._batch_match(cost, wt1, wt2, thrsh)
 
