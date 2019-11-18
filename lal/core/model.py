@@ -235,7 +235,7 @@ class LALGBClassifier(_LALGBBaseModel):
         probs = self.predict_proba(train_data, train_labels, test_data)
 
         self.lal_logger.info("Hard-Prediction on probabilities")
-        return np.argmax(probs, axis=1) + 1
+        return np.argmax(probs, axis=1)
 
 
 class LALGBRegressor(_LALGBBaseModel):
