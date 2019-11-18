@@ -1,5 +1,5 @@
 # python standard library
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, ABC
 from functools import reduce
 
 # pyspark package
@@ -217,13 +217,14 @@ class LALGBSparkBinaryClassifier(_LALModelBase):
         return tmp_sdf
 
 
-class LALGBSparkMultiClassifier(_LALModelBase):
+class LALGBSparkCategoricalClassifier(_LALModelBase):
     """
-    This is when our training labels are categorical.
+
     """
     def __init__(self, **kwargs):
         _LALModelBase.__init__(self, **kwargs)
-        self.weighter = GBMWeightMultiClassifier(feature_col=self.input_cols, label_col=self.label_cols, optimize=self.opt)
+        self.weighter = GBMWeightMultiClassifier(feature_col=self.input_cols,
+                                                 label_col=self.label_cols, optimize=self.opt)
         self.pred_cols = None
 
     @_LALModelBase.lal_logger.log_error
@@ -241,43 +242,42 @@ class LALGBSparkMultiClassifier(_LALModelBase):
 
         label_cols = self.label_cols
 
-        if isinstance(label_cols, str):
-            label_cols = [label_cols]
-        else:
-            raise ValueError("At the moment, we only allow single output prediction.")
+        assert isinstance(label_cols, str)
 
         # gets the matches
         matches_sdf = self.get_matches(sdf1, sdf2)
 
-        # gets the class label per match
-        matched_labels_sdf = matches_sdf.join(sdf1.select(["id"] + label_cols).withColumnRenamed("id", "id1"), "id1")
+        def get_label_col_prediction(_col):
+            matched_labels_sdf = matches_sdf.join(sdf1.select(["id", _col]).withColumnRenamed("id", "id1"),
+                                                  "id1")
 
-        # gets the unique values
-        unique_vals = sdf1.agg(F.countDistinct(F.col(label_cols[0]))).collect()
+            # gets the unique values
+            unique_vals = sdf1.agg(F.countDistinct(F.col(_col))).collect()
 
-        # one-hot-encodes our class labels
-        one_hot_encoded_vals_sdf = reduce(lambda df, val:
-                                          df.withColumn("{}_{}".format(label_cols[0],
-                                                                       F.when(F.col(label_cols[0]) == val,
-                                                                              1).otherwise(0))),
-                                          unique_vals, matched_labels_sdf)
+            # one-hot-encodes our class labels
+            one_hot_encoded_vals_sdf = reduce(lambda df, val:
+                                              df.withColumn("{}_{}".format(_col, val),
+                                                                           F.when(F.col(_col) == val,
+                                                                                  1).otherwise(0)),
+                                              unique_vals, matched_labels_sdf)
 
-        # generates the experimental probability of belonging to that class
-        exprs = {"{}_{}".format(label_cols[0], val): "avg" for val in unique_vals}
+            new_cols = ["{}_{}".format(_col, val) for val in unique_vals]
 
-        tmp_preds_sdf = one_hot_encoded_vals_sdf.groupby("id2").agg(exprs).withColumnRenamed("id2", "id")
+            tmp_preds_sdf = one_hot_encoded_vals_sdf.groupby("id2")\
+                .agg(*[F.avg(_new_col).alias(_new_col) for _new_col in new_cols])\
+                .withColumn("one_norm", F.sum(*[F.col(_new_col) for _new_col in new_cols]))
 
-        # sums the independent-class probabilities to normalize the probabilities of the multiclass probs
-        preds_sdf = reduce(lambda df, key: df.withColumnRenamed("avg({})".format(key), "raw_{}_tmp".format(key)),
-                           list(exprs.keys()), tmp_preds_sdf).withColumn("one_norm", F.sum(F.col(key) for key in exprs.keys()))
+            res_sdf = reduce(lambda df, col: df.withColumn("raw_{}".format(col),
+                                                           F.col(col) / F.col("one_norm")),
+                             new_cols, tmp_preds_sdf).drop("one_norm")
 
-        res_sdf = reduce(lambda df, key: df.withColumn("raw_{}".format(key),
-                                                       F.col("raw_{}_tmp".format(key)) / F.col("one_norm")),
-                         list(exprs.keys()), preds_sdf).drop("one_norm")
+            return new_cols, res_sdf
 
-        self.pred_cols = list(exprs.keys())
+        pred_cols, _sdf = get_label_col_prediction(label_cols)
 
-        return res_sdf
+        self.pred_cols = pred_cols
+
+        return _sdf
 
     @_LALModelBase.lal_logger.log_error
     @_LALModelBase.assertor.assert_arguments
@@ -292,16 +292,101 @@ class LALGBSparkMultiClassifier(_LALModelBase):
         :return:
         """
 
-        label_col = self.label_cols
+        label_cols = self.label_cols
 
         preds_cols = self.pred_cols
 
         preds_sdf = self.predict_proba(sdf1, sdf2)
 
-        cond = "F.when" + ".when".join(
-            ["(F.col('" + c + "') == F.col('max_value'), F.lit('" + c + "'))" for c in preds_cols])
+        def get_predictions(label_col):
+            pred_col = filter(lambda x: label_col in x, preds_cols)
 
-        tmp_sdf = preds_sdf.withColumn("max_value", F.greatest(*(F.col(c) for c in preds_cols)))\
-            .withColumn(label_col, eval(cond))
+            cond_lst = [F.when(F.col(_x) == F.col("max_value"), F.lit(_x.split("_{}_".format(label_col))[-1]))
+                        for _x in pred_col]
 
-        return tmp_sdf
+            cond = reduce(lambda left, right: left.otherwise(right), cond_lst)
+
+            tmp_sdf = preds_sdf.withColumn("max_value", F.greatest(*(F.col(c) for c in preds_cols)))\
+                .withColumn(label_col, cond)
+
+            return tmp_sdf.select(["id2", label_col])
+
+        return get_predictions(label_cols)
+
+
+class _LALSparkMultiBase(metaclass=ABCMeta):
+    """
+    This is a Base for the MultiOutput Model.  We will properly define the base below
+    """
+    task_base = _LALModelBase
+
+    def __init__(self, **kwargs):
+
+        self.pred_multi_dict = None
+
+        if kwargs is None:
+            raise ValueError
+        else:
+            if 'label_cols' in kwargs.keys():
+                params = {key: kwargs[key] for key in kwargs.keys() if not ('label_cols' == key)}
+
+                self.task_multi_dict = {label_col: self.task_base(label_cols=label_col, **params) for label_col in
+                                   kwargs["label_cols"]}
+
+    def fit(self, sdf):
+        """
+        In this fit method, we map each of the underlying single columnar methods onto each column we want to predict
+        :param sdf:
+        :return:
+        """
+
+        task_multi_dict = self.task_multi_dict
+
+        self.pred_multi_dict = {key: task_multi_dict[key].fit(sdf) for key in task_multi_dict.keys()}
+
+        return sdf
+
+    def predict(self, sdf1, sdf2):
+        pred_dict = self.pred_multi_dict
+
+        def get_predictions(label_col):
+            return pred_dict[label_col].predict(sdf1, sdf2)
+
+        return reduce(lambda left, right: left.join(right, "id2"), map(get_predictions, list(pred_dict.keys())))
+
+
+class LALGBSparkMultiBinaryClassifier(_LALSparkMultiBase):
+    """
+    This is our Multioutput Binary Classifier, where our training labels are all binary.
+    """
+    task_base = LALGBSparkBinaryClassifier
+
+    def predict_proba(self, sdf1, sdf2):
+        pred_dict = self.pred_multi_dict
+
+        def get_predictions(label_col):
+            return pred_dict[label_col].predict_proba(sdf1, sdf2)
+
+        return reduce(lambda left, right: left.join(right, "id2"), map(get_predictions, list(pred_dict.keys())))
+
+
+class LALGBSparkMultiCategoricalClassifier(_LALSparkMultiBase):
+    """
+    This is our Multioutput Categorical Classifier, where our training labels are all binary.
+    """
+    task_base = LALGBSparkCategoricalClassifier
+
+    def predict_proba(self, sdf1, sdf2):
+        pred_dict = self.pred_multi_dict
+
+        def get_predictions(label_col):
+            return pred_dict[label_col].predict_proba(sdf1, sdf2)
+
+        return reduce(lambda left, right: left.join(right, "id2"), map(get_predictions, list(pred_dict.keys())))
+
+
+class LALGBSparkMultiRegressorClassifier(_LALSparkMultiBase):
+    """
+    This is our Multioutput Regressor, where our training labels are all binary.
+    """
+    task_base = LALGBSparkRegressor

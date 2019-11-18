@@ -218,13 +218,12 @@
 </dd></dl>
 
 <dl class="class">
-<dt id="lal.spark.model.LALGBSparkMultiClassifier">
-<em class="property">class </em><code class="sig-prename descclassname">lal.spark.model.</code><code class="sig-name descname">LALGBSparkMultiClassifier</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiClassifier" title="Permalink to this definition">¶</a></dt>
+<dt id="lal.spark.model.LALGBSparkCategoricalClassifier">
+<em class="property">class </em><code class="sig-prename descclassname">lal.spark.model.</code><code class="sig-name descname">LALGBSparkCategoricalClassifier</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkCategoricalClassifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.model._LALModelBase</span></code></p>
-<p>This is when our training labels are categorical.</p>
 <dl class="method">
-<dt id="lal.spark.model.LALGBSparkMultiClassifier.predict">
-<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiClassifier.predict" title="Permalink to this definition">¶</a></dt>
+<dt id="lal.spark.model.LALGBSparkCategoricalClassifier.predict">
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkCategoricalClassifier.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>We choose most probable label our samples in the testing dataset has.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -240,8 +239,8 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="lal.spark.model.LALGBSparkMultiClassifier.predict_proba">
-<code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
+<dt id="lal.spark.model.LALGBSparkCategoricalClassifier.predict_proba">
+<code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkCategoricalClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
 <dd><p>This predicts the probability of our test data having any of the available labels in the training dataset</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -254,6 +253,55 @@
 <dd class="field-even"><p></p>
 </dd>
 </dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lal.spark.model.LALGBSparkMultiBinaryClassifier">
+<em class="property">class </em><code class="sig-prename descclassname">lal.spark.model.</code><code class="sig-name descname">LALGBSparkMultiBinaryClassifier</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiBinaryClassifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.model._LALSparkMultiBase</span></code></p>
+<p>This is our Multioutput Binary Classifier, where our training labels are all binary.</p>
+<dl class="method">
+<dt id="lal.spark.model.LALGBSparkMultiBinaryClassifier.predict_proba">
+<code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param">sdf1</em>, <em class="sig-param">sdf2</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiBinaryClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lal.spark.model.LALGBSparkMultiBinaryClassifier.task_base">
+<code class="sig-name descname">task_base</code><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiBinaryClassifier.task_base" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#lal.spark.model.LALGBSparkBinaryClassifier" title="lal.spark.model.LALGBSparkBinaryClassifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">LALGBSparkBinaryClassifier</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lal.spark.model.LALGBSparkMultiCategoricalClassifier">
+<em class="property">class </em><code class="sig-prename descclassname">lal.spark.model.</code><code class="sig-name descname">LALGBSparkMultiCategoricalClassifier</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiCategoricalClassifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.model._LALSparkMultiBase</span></code></p>
+<p>This is our Multioutput Categorical Classifier, where our training labels are all binary.</p>
+<dl class="method">
+<dt id="lal.spark.model.LALGBSparkMultiCategoricalClassifier.predict_proba">
+<code class="sig-name descname">predict_proba</code><span class="sig-paren">(</span><em class="sig-param">sdf1</em>, <em class="sig-param">sdf2</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiCategoricalClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lal.spark.model.LALGBSparkMultiCategoricalClassifier.task_base">
+<code class="sig-name descname">task_base</code><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiCategoricalClassifier.task_base" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#lal.spark.model.LALGBSparkCategoricalClassifier" title="lal.spark.model.LALGBSparkCategoricalClassifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">LALGBSparkCategoricalClassifier</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lal.spark.model.LALGBSparkMultiRegressorClassifier">
+<em class="property">class </em><code class="sig-prename descclassname">lal.spark.model.</code><code class="sig-name descname">LALGBSparkMultiRegressorClassifier</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiRegressorClassifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lal.spark.model._LALSparkMultiBase</span></code></p>
+<p>This is our Multioutput Regressor, where our training labels are all binary.</p>
+<dl class="attribute">
+<dt id="lal.spark.model.LALGBSparkMultiRegressorClassifier.task_base">
+<code class="sig-name descname">task_base</code><a class="headerlink" href="#lal.spark.model.LALGBSparkMultiRegressorClassifier.task_base" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#lal.spark.model.LALGBSparkRegressor" title="lal.spark.model.LALGBSparkRegressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">LALGBSparkRegressor</span></code></a></p>
 </dd></dl>
 
 </dd></dl>
